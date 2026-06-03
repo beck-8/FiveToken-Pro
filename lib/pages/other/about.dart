@@ -105,7 +105,10 @@ class AboutPage extends StatelessWidget {
                             url: 'https://t.me/beck_debug', title: 'Telegram');
                       },
                       child: Text('t.me/beck_debug',
-                          style: TextStyle(fontSize: 15, color: Color(FTips2))),
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: CustomColor.primary,
+                              decoration: TextDecoration.underline)),
                     ),
                   ],
                 ),

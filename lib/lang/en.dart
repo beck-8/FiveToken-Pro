@@ -80,7 +80,7 @@ const Map<String, String> EN_LANG = {
       "confirmed to delete the frequently used address from the address book",
   "deleteSucc": "Delete successfully",
   "selectAddr": "Select receiving address",
-  "filscan": "View on explorer",
+  "filscan": "View in browser",
   "shareAddr": "Share my address",
   "set": "Setup",
   "feedback": "Feedback",

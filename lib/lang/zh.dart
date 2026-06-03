@@ -78,7 +78,7 @@ const Map<String, String> ZH_LANG = {
   'confirmDelete': '已确认在地址簿中移除该常用地址',
   'deleteSucc': '删除成功',
   'selectAddr': '选择接收地址',
-  'filscan': '区块浏览器查看',
+  'filscan': '浏览器查看',
   'shareAddr': '分享我的地址',
   'set': '设置',
   'feedback': '问题反馈',
