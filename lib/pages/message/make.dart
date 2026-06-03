@@ -537,10 +537,8 @@ class MesMakePageState extends State<MesMakePage> {
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp("[0-9.]"))
                           ]),
-                      visible: method == '0' ||
-                          method == '16' ||
-                          method == '24' ||
-                          method == '2',
+                      visible:
+                          method == '0' || method == '16' || method == '24',
                     ),
                     SizedBox(
                       height: 10,
@@ -572,7 +570,34 @@ class MesMakePageState extends State<MesMakePage> {
                                     this.sealType = v;
                                   });
                                 },
-                                sealType: sealType))
+                                sealType: sealType)),
+                        Visibility(
+                          visible: method == '2',
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Field(
+                                  label: 'minerDeposit'.tr,
+                                  controller: valueCtrl,
+                                  type: TextInputType.numberWithOptions(
+                                      decimal: true),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp("[0-9.]"))
+                                  ],
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(4, 8, 4, 0),
+                                  child: CommonText.grey(
+                                      'createMinerDepositDes'.tr,
+                                      size: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                       ],
                     ),
                     Visibility(

@@ -18,6 +18,8 @@ const Map<String, String> ZH_LANG = {
   'marketEscrow': '市场总额',
   'marketLocked': '市场锁定',
   'marketWithdraw': '市场提现',
+  'minerDeposit': '保证金',
+  'createMinerDepositDes': '创建矿工需缴纳保证金(FIP-0077,防止垃圾矿工)。金额约为 10TiB 算力初始抵押的 10%(主网约 4 FIL,测试网更低)。保证金会锁入矿工的释放表、180 天线性归还;多缴的部分会留在矿工余额里。',
   //wallet
   'wallet': "账户",
   'enterName': '请输入账户名称',

@@ -17,6 +17,8 @@ const Map<String, String> EN_LANG = {
   "marketEscrow": "Market total",
   "marketLocked": "Market locked",
   "marketWithdraw": "Market withdraw",
+  "minerDeposit": "Deposit",
+  "createMinerDepositDes": "Creating a miner requires a deposit (FIP-0077, anti-spam): about 10% of the initial pledge for 10 TiB (~4 FIL on mainnet, lower on testnet). It is locked in the miner vesting table and vests over 180 days; any excess stays in the miner balance.",
   "wallet": "Account",
   "enterName": "Please enter Account name",
   "walletName": "Account name",
