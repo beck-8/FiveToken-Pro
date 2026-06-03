@@ -1,19 +1,8 @@
 import 'package:fil/index.dart';
 
-const _url = 'http://8.209.219.115:8090';
-
-/// get fil price
+/// Fiat price was served by a hosted FiveToken endpoint that is now offline.
+/// To keep the wallet self-contained (only dependency = the RPC node), the
+/// price feed is disabled and returns a zero price (the UI renders it as "--").
 Future<FilPrice> getFilPrice() async {
-  try {
-    var url = _url;
-    var response = await Dio().get('$url/third/price');
-    if (response.data['code'] == 0) {
-      return FilPrice.fromJson(response.data['data']);
-    } else {
-      return FilPrice();
-    }
-  } catch (e) {
-    print(e);
-    return FilPrice();
-  }
+  return FilPrice();
 }

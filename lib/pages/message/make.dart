@@ -148,7 +148,7 @@ class MesMakePageState extends State<MesMakePage> {
     }
     var requestValue = fil2Atto(value);
     if (method == '16') {
-      params = '{"AmountRequested": "${fil2Atto(value)}"}';
+      params = FilParams.minerWithdraw(fil2Atto(value));
       value = '0';
       prefix = 'Owner';
     }
@@ -197,7 +197,7 @@ class MesMakePageState extends State<MesMakePage> {
           return;
         }
       }
-      params = '\"$newOwner\"';
+      params = FilParams.changeOwner(newOwner);
     }
     if (method == '2') {
       var w = worker.text.trim();
@@ -246,10 +246,8 @@ class MesMakePageState extends State<MesMakePage> {
         showCustomError('enterController'.tr);
         return;
       }
-      params = jsonEncode({
-        'NewWorker': worker.text.trim(),
-        'NewControlAddrs': controllers.map((ctrl) => ctrl.text.trim()).toList()
-      });
+      params = FilParams.changeWorker(worker.text.trim(),
+          controllers.map((ctrl) => ctrl.text.trim()).toList());
     }
     try {
       var res = await Global.provider.buildMessage({
@@ -260,7 +258,8 @@ class MesMakePageState extends State<MesMakePage> {
         'params': params == '' ? null : params
       });
       if (method == '16') {
-        res.args = params;
+        // keep a human-readable args for the local history display
+        res.args = '{"AmountRequested": "$requestValue"}';
       }
       var gas = Gas(
           feeCap: res.gasFeeCap,

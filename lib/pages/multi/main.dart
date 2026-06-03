@@ -156,7 +156,9 @@ class MultiMainPageState extends State<MultiMainPage> with RouteAware {
         var maxNonce = 0;
         var messages = list.map((e) {
           var mes = CacheMultiMessage.fromJson(e);
-          mes.pending = 0;
+          // On-chain MsigGetPending entries are awaiting approval -> keep them
+          // pending so the approve flow stays available.
+          mes.pending = mes.status == MultiMessageStatus.pending ? 1 : 0;
           mes.owner = $store.addr;
           mes.type = selectType;
           if (mes.nonce != null &&

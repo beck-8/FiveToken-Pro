@@ -629,19 +629,89 @@ class FilecoinProvider {
     return <Map<String, dynamic>>[];
   }
 
-  /// Pending multisig proposals — TODO: source from MsigGetPending.
+  /// Map an actor method number to the FilecoinMethod name used by the UI.
+  String _msigInnerMethodName(int method) {
+    switch (method) {
+      case 0:
+        return FilecoinMethod.send;
+      case 3:
+        return FilecoinMethod.changeWorker;
+      case 16:
+        return FilecoinMethod.withdraw;
+      case 23:
+        return FilecoinMethod.changeOwner;
+      default:
+        return FilecoinMethod.send;
+    }
+  }
+
+  /// Pending multisig proposals, sourced from on-chain MsigGetPending.
+  /// Returns backend-shaped maps so CacheMultiMessage.fromJson stays unchanged.
+  /// Note: the proposer is the first entry of Approved[] (the protocol auto-adds
+  /// the proposer as the first approver). blockTime/fee are not on-chain.
   Future<List<Map<String, dynamic>>> getMultiMessageList(
       {@required String actor,
       String direction = 'down',
       String mid = '',
       int limit = 20}) async {
-    return <Map<String, dynamic>>[];
+    try {
+      var pending = await _call('MsigGetPending', [actor, _head]);
+      if (pending is! List) {
+        return <Map<String, dynamic>>[];
+      }
+      var out = <Map<String, dynamic>>[];
+      for (var t in pending) {
+        if (t is! Map) continue;
+        var txid = t['ID'] ?? 0;
+        var to = (t['To'] ?? '').toString();
+        var value = (t['Value'] ?? '0').toString();
+        var method = t['Method'] ?? 0;
+        var params = (t['Params'] ?? '').toString();
+        var approved = t['Approved'] is List ? t['Approved'] as List : [];
+        var proposer = approved.isNotEmpty ? approved[0].toString() : '';
+        // Subsequent approvers (excluding the proposer, who is counted as +1
+        // in the UI's approveNum getter).
+        var approves = <Map<String, dynamic>>[];
+        for (var i = 1; i < approved.length; i++) {
+          approves.add({
+            'from': approved[i].toString(),
+            'gas_fee': '0',
+            'block_time': 0,
+            'nonce': 0,
+            'cid': '',
+            'exit_code': 0
+          });
+        }
+        out.add({
+          'cid': 'msig_${actor}_$txid',
+          'block_time': 0,
+          'to': actor,
+          'from': proposer,
+          'status': MultiMessageStatus.pending,
+          'gas_fee': '0',
+          'params_json': jsonEncode(
+              {'To': to, 'Value': value, 'Method': method, 'Params': params}),
+          'params_method': _msigInnerMethodName(method),
+          'params_params': '',
+          'nonce': 0,
+          'params_txnid': txid,
+          'exit_code': 0,
+          'value': '0',
+          'approves': approves,
+        });
+      }
+      return out;
+    } catch (e) {
+      print(e);
+      return <Map<String, dynamic>>[];
+    }
   }
 
   Future<CacheMultiMessage> getMultiMessageDetail(String cid) async {
     throw Exception('not supported');
   }
 
+  /// Power/sector indicators need a historical indexer — not available on-chain.
   Future<MinerMeta> getMinerMeta(String addr) async {
     throw Exception('not supported');
   }
@@ -650,14 +720,70 @@ class FilecoinProvider {
     throw Exception('not supported');
   }
 
-  /// Miner related-address balances — TODO: source from StateMinerInfo.
+  /// Miner related addresses (owner/worker/control/beneficiary) + their balances,
+  /// read directly from StateMinerInfo + StateGetActor.
   Future<List<MinerAddress>> getMinerRelatedAddressBalance(String actor) async {
-    throw Exception('not supported');
+    var info = await _call('StateMinerInfo', [actor, _head]);
+    var result = <MinerAddress>[];
+    Future<void> addAddr(dynamic addr, String type) async {
+      if (addr == null) return;
+      var a = addr.toString();
+      if (a == '' || a == '<empty>') return;
+      var bal = '0';
+      try {
+        var act = await _call('StateGetActor', [a, _head]);
+        if (act is Map && act['Balance'] != null) {
+          bal = act['Balance'].toString();
+        }
+      } catch (_) {}
+      var m = MinerAddress(address: a, type: type, balance: bal);
+      m.miner = actor;
+      result.add(m);
+    }
+
+    if (info is Map) {
+      await addAddr(info['Owner'], 'owner');
+      await addAddr(info['Worker'], 'worker');
+      var ctrls = info['ControlAddresses'];
+      if (ctrls is List) {
+        for (var c in ctrls) {
+          await addAddr(c, 'controller');
+        }
+      }
+      var beneficiary = info['Beneficiary'];
+      if (beneficiary != null &&
+          beneficiary.toString() != (info['Owner'] ?? '').toString()) {
+        await addAddr(beneficiary, 'beneficiary');
+      }
+    }
+    return result;
   }
 
-  /// Miner self balance — TODO: source from StateMinerAvailableBalance.
+  /// Miner balances read directly from chain: total (actor balance), available
+  /// (withdrawable), locked (vesting) and pledge (initial pledge).
   Future<MinerSelfBalance> getMinerBalanceInfo(String address) async {
-    throw Exception('not supported');
+    var res = MinerSelfBalance();
+    try {
+      var actor = await _call('StateGetActor', [address, _head]);
+      if (actor is Map && actor['Balance'] != null) {
+        res.total = actor['Balance'].toString();
+      }
+    } catch (_) {}
+    try {
+      var avail = await _call('StateMinerAvailableBalance', [address, _head]);
+      if (avail != null) {
+        res.available = avail.toString();
+      }
+    } catch (_) {}
+    try {
+      var st = await _call('StateReadState', [address, _head]);
+      if (st is Map && st['State'] is Map) {
+        var s = st['State'] as Map;
+        res.locked = (s['LockedFunds'] ?? '0').toString();
+        res.pledge = (s['InitialPledge'] ?? '0').toString();
+      }
+    } catch (_) {}
+    return res;
   }
 
   /// Multisig deposit history — removed (needs an indexer).
