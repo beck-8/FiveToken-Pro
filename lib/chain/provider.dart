@@ -470,6 +470,26 @@ class FilecoinProvider {
 
   /// Message status via StateSearchMsg (degraded: confirmation + exit code).
   Future<MessageDetail> getMessageDetail(String cid) async {
+    var detail = MessageDetail(signedCid: cid);
+    // Message content (from / to / value / method / gas) — StateSearchMsg only
+    // returns the receipt, so fetch the message itself.
+    try {
+      var msg = await _call('ChainGetMessage', [
+        {'/': cid}
+      ]);
+      if (msg is Map) {
+        detail.from = msg['From'];
+        detail.to = msg['To'];
+        detail.value = (msg['Value'] ?? '0').toString();
+        detail.nonce = msg['Nonce'];
+        detail.method = msg['Method'];
+        detail.methodName = _methodName(msg['Method']);
+        detail.gasFeeCap = (msg['GasFeeCap'] ?? '0').toString();
+        detail.gasPremium = (msg['GasPremium'] ?? '0').toString();
+        detail.gasLimit = msg['GasLimit'] ?? 0;
+      }
+    } catch (_) {}
+    // Status / height from the receipt.
     try {
       var res = await _call('StateSearchMsg', [
         _head,
@@ -477,7 +497,6 @@ class FilecoinProvider {
         -1,
         true
       ]);
-      var detail = MessageDetail(signedCid: cid);
       if (res is Map) {
         if (res['Receipt'] is Map) {
           detail.exitCode = res['Receipt']['ExitCode'];
@@ -489,10 +508,28 @@ class FilecoinProvider {
       } else {
         detail.pending = 1;
       }
-      return detail;
     } catch (e) {
-      // not yet on chain
-      return MessageDetail(signedCid: cid)..pending = 1;
+      detail.pending = 1;
+    }
+    return detail;
+  }
+
+  /// Map an actor method number to the wallet's method-name string.
+  String _methodName(dynamic method) {
+    var m = method is int ? method : 0;
+    switch (m) {
+      case 0:
+        return FilecoinMethod.send;
+      case 2:
+        return FilecoinMethod.exec;
+      case 3:
+        return FilecoinMethod.changeWorker;
+      case 16:
+        return FilecoinMethod.withdraw;
+      case 23:
+        return FilecoinMethod.changeOwner;
+      default:
+        return FilecoinMethod.send;
     }
   }
 

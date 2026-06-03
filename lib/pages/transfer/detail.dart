@@ -29,10 +29,20 @@ class FilDetailPageState extends State<FilDetailPage> {
     showCustomLoading('Loading');
     var res = await Global.provider.getMessageDetail(mes.signedCid);
     dismissAllToast();
-    if (res.height != null) {
+    {
       setState(() {
         if (mes.multiMethod == '') {
           msgDetail = res;
+          // fall back to the local record when the chain lookup is partial
+          if (msgDetail.from == null || msgDetail.from == '') {
+            msgDetail.from = mes.from;
+          }
+          if (msgDetail.to == null || msgDetail.to == '') {
+            msgDetail.to = mes.to;
+          }
+          if (msgDetail.value == null || msgDetail.value == '0') {
+            msgDetail.value = mes.value;
+          }
           if (res.methodName == FilecoinMethod.withdraw && res.args is Map) {
             amount = res.args['AmountRequested'];
           }
