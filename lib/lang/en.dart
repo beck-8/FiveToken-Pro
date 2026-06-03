@@ -80,7 +80,7 @@ const Map<String, String> EN_LANG = {
       "confirmed to delete the frequently used address from the address book",
   "deleteSucc": "Delete successfully",
   "selectAddr": "Select receiving address",
-  "filscan": "View on Filscan",
+  "filscan": "View on explorer",
   "shareAddr": "Share my address",
   "set": "Setup",
   "feedback": "Feedback",
@@ -338,7 +338,7 @@ const Map<String, String> EN_LANG = {
   'updateCheck': 'Check for update',
   'aboutWeb': 'Official Website',
   'aboutData': 'Data & Analytics',
-  'wechat': "Service Wechat",
+  'wechat': "Contact me",
   'depositTips': 'Tips',
   'depositDes':
       'Choose offline to create  transfer message, then signed offline, after you have signed it, then click Discover and choose Push Message function to Push message',

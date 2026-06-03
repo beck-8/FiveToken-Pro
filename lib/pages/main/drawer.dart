@@ -97,10 +97,9 @@ class DrawerBody extends StatelessWidget {
           ),
           DrawerItem(
             onTap: () {
-              var url = Global.langCode == 'zh'
-                  ? 'https://docs.google.com/forms/d/e/1FAIpQLSeZrn_8u6GUHlQQRZdvwRUrhCNOCiopVe1_z9alvOiyQFJW5A/viewform?usp=sf_link'
-                  : 'https://docs.google.com/forms/d/e/1FAIpQLSfXRxdhK8NPcMxrHtDNpocFGZ5sFpINmcurYes-5x2c80aAdQ/viewform?usp=sf_link';
-              goWebviewPage(url: url, title: 'feedback'.tr);
+              goWebviewPage(
+                  url: 'https://github.com/beck-8/FiveToken-Pro/issues',
+                  title: 'feedback'.tr);
             },
             label: 'feedback'.tr,
             iconPath: 'feedback.png',

@@ -91,21 +91,14 @@ class PowerBoardState extends State<PowerBoard> {
             weight: FontWeight.bold,
           ),
           CommonText('${'metaPercent'.tr}: $powerPercent'),
-          CommonText('${'metaRank'.tr}: ${meta.rank}'),
         ]),
         Divider(),
         MinerStatusRow(
           label: 'metaRaw'.tr,
           value: unitConversion(meta.rawPower, 2),
         ),
-        MinerStatusRow(
-          label: 'metaBlocks'.tr,
-          value: meta.blockCount.toString(),
-        ),
-        MinerStatusRow(
-          label: 'metaRewards'.tr,
-          value: formatFil(meta.rewards, size: 2),
-        ),
+        // rank / blocks mined / accrued rewards need an indexer (not on-chain),
+        // so they are omitted.
         MinerStatusRow(
           label: 'metaSectorSize'.tr,
           value: unitConversion(meta.sectorSize.toString(), 0),

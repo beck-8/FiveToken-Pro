@@ -65,7 +65,8 @@ class AboutPage extends StatelessWidget {
               ListTile(
                 onTap: () {
                   goWebviewPage(
-                      url: "https://fivetoken.io", title: 'Fivetoken');
+                      url: "https://github.com/beck-8/FiveToken-Pro",
+                      title: 'FiveToken Pro');
                 },
                 title: Row(
                   children: <Widget>[
@@ -73,20 +74,20 @@ class AboutPage extends StatelessWidget {
                     Expanded(
                       child: SizedBox(),
                     ),
-                    Text("https://fivetoken.io", style: _textStyle)
+                    Text("github.com/beck-8/FiveToken-Pro", style: _textStyle)
                   ],
                 ),
               ),
               _divider,
               ListTile(
                 onTap: () {
-                  goWebviewPage(url: "https://m.filscan.io", title: 'Filscan');
+                  goWebviewPage(url: "https://filfox.info", title: 'filfox');
                 },
                 title: Row(
                   children: <Widget>[
                     Text('aboutData'.tr, style: ListLabelStyle),
                     Spacer(),
-                    Text("https://filscan.io", style: _textStyle)
+                    Text("RPC + filfox.info", style: _textStyle)
                   ],
                 ),
               ),
@@ -100,20 +101,11 @@ class AboutPage extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        copyText('FilecoinWallet001');
-                        showCustomToast('copySucc'.tr);
+                        goWebviewPage(
+                            url: 'https://t.me/beck_debug', title: 'Telegram');
                       },
-                      child: Row(
-                        children: [
-                          IconCopy2,
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text('FilecoinWallet001',
-                              style:
-                                  TextStyle(fontSize: 15, color: Color(FTips2)))
-                        ],
-                      ),
+                      child: Text('t.me/beck_debug',
+                          style: TextStyle(fontSize: 15, color: Color(FTips2))),
                     ),
                   ],
                 ),

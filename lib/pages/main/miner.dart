@@ -147,6 +147,10 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
               SizedBox(
                 height: 12,
               ),
+              PowerBoard(),
+              SizedBox(
+                height: 12,
+              ),
               BalanceMonitoring()
             ],
           ),

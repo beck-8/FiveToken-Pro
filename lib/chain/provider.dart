@@ -760,9 +760,45 @@ class FilecoinProvider {
     throw Exception('not supported');
   }
 
-  /// Power/sector indicators need a historical indexer — not available on-chain.
+  /// Current power + sectors, read directly from chain (StateMinerPower /
+  /// StateMinerSectorCount / StateMinerInfo). Rank / blocks mined / accrued
+  /// rewards are global-aggregate or historical and stay unset (would need an
+  /// indexer); the UI hides those rows.
   Future<MinerMeta> getMinerMeta(String addr) async {
-    throw Exception('not supported');
+    var meta = MinerMeta();
+    try {
+      var power = await _call('StateMinerPower', [addr, _head]);
+      if (power is Map && power['MinerPower'] is Map) {
+        meta.qualityPower =
+            (power['MinerPower']['QualityAdjPower'] ?? '0').toString();
+        meta.rawPower = (power['MinerPower']['RawBytePower'] ?? '0').toString();
+        try {
+          var mq = BigInt.parse(meta.qualityPower);
+          var tq = BigInt.parse(
+              (power['TotalPower']['QualityAdjPower'] ?? '0').toString());
+          if (tq > BigInt.zero) {
+            // percent of network quality-adjusted power (ppm -> percent)
+            var ppm = mq * BigInt.from(1000000) ~/ tq;
+            meta.percent = (ppm.toDouble() / 10000).toStringAsFixed(4);
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+    try {
+      var sc = await _call('StateMinerSectorCount', [addr, _head]);
+      if (sc is Map) {
+        meta.allSectors = sc['Live'] ?? 0;
+        meta.liveSectors = sc['Active'] ?? 0;
+        meta.faultSectors = sc['Faulty'] ?? 0;
+      }
+    } catch (_) {}
+    try {
+      var info = await _call('StateMinerInfo', [addr, _head]);
+      if (info is Map && info['SectorSize'] != null) {
+        meta.sectorSize = info['SectorSize'];
+      }
+    } catch (_) {}
+    return meta;
   }
 
   Future<MinerHistoricalStats> getMinerYesterdayInfo(String addr) async {
