@@ -380,6 +380,11 @@ class MesMakePageState extends State<MesMakePage> {
           this.getFromType(addr);
         }
       }
+    } else {
+      // Advanced -> Message build (no arguments): default From to the active
+      // wallet so building and signing with the same wallet just matches.
+      fromCtrl.text = wallet.addrWithNet;
+      getFromBalance(fromCtrl.text);
     }
   }
 
