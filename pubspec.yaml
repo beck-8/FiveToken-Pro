@@ -35,8 +35,12 @@ dependencies:
   event_bus: ^1.1.1
   crypto: 2.1.3
   encrypt: ^4.0.0
+  # flotus provides the native signing / CBOR library. The upstream
+  # FiveToken/flotus ships a stale android/wlib/wlib.aar missing genCid /
+  # genConfirmUpdateWorkerKey, which breaks the build, so we use a fork whose
+  # wlib.aar exports the full native API.
   flotus:
-    git: https://github.com/FiveToken/flotus.git
+    git: https://github.com/beck-8/flotus
   bls:
     git: https://github.com/FiveToken/bls.git
   permission_handler: 3.0.1

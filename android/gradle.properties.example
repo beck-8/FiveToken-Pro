@@ -1,0 +1,24 @@
+# Copy this file to `android/gradle.properties` before building:
+#
+#     cp android/gradle.properties.example android/gradle.properties
+#
+# `android/gradle.properties` itself is gitignored by the repo-wide
+# `*.properties` rule, so each build environment provides its own.
+
+org.gradle.jvmargs=-Xmx2048M
+
+# This app predates AndroidX and uses the legacy Android Support libraries.
+android.useAndroidX=false
+android.enableJetifier=false
+
+# --- Environment-specific (uncomment / adjust for your machine) -------------
+
+# AGP 3.5.0 requires a Java 8 JDK. If your default `java` is newer (11/17),
+# point Gradle at a local JDK 8 install:
+# org.gradle.java.home=/path/to/jdk8
+
+# If your network needs an HTTP proxy for Gradle to reach Maven/Google:
+# systemProp.http.proxyHost=127.0.0.1
+# systemProp.http.proxyPort=7890
+# systemProp.https.proxyHost=127.0.0.1
+# systemProp.https.proxyPort=7890
