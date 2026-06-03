@@ -400,7 +400,9 @@ class MultiMainPageState extends State<MultiMainPage> with RouteAware {
                           MultiWalletService(),
                           Spacer(),
                           Row(
-                            children: List.generate([0, 1].length, (index) {
+                            // Only the "propose" tab: the "receive" tab needed
+                            // the dead indexer (msig deposit history).
+                            children: List.generate([0].length, (index) {
                               return Expanded(
                                   child: genMethodSelectItem(
                                       type: index,

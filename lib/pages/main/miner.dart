@@ -17,6 +17,8 @@ class MinerAddressStats extends StatefulWidget {
 
 class MinerAddressStatsState extends State<MinerAddressStats> {
   MinerSelfBalance info = MinerSelfBalance();
+  String marketEscrow = '0';
+  String marketLocked = '0';
   Worker worker;
   var box = OpenedBox.minerBalanceInstance;
   List<MinerAddress> relatedList = [];
@@ -46,7 +48,17 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
       if (mounted) {
         setState(() {
           this.info = balance;
-          // this.relatedList = res.relatedAddress;
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+    try {
+      var market = await Global.provider.getMarketBalance(addr);
+      if (mounted) {
+        setState(() {
+          marketEscrow = market['escrow'] ?? '0';
+          marketLocked = market['locked'] ?? '0';
         });
       }
     } catch (e) {
@@ -98,13 +110,6 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
                 weight: FontWeight.w800,
               ),
               SizedBox(
-                height: 12,
-              ),
-              MarketPrice(
-                atto: true,
-                balance: info.total,
-              ),
-              SizedBox(
                 height: 18,
               ),
               Obx(() => CopyAddress($store.wal.addrWithNet)),
@@ -128,11 +133,17 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
               SizedBox(
                 height: 12,
               ),
-              PowerBoard(),
-              SizedBox(
-                height: 12,
-              ),
-              YesterdayBoard(),
+              MinerBoard(Row(
+                children: [
+                  Expanded(
+                      child: minerMeta('marketEscrow'.tr,
+                          formatFil(marketEscrow, size: 2))),
+                  Expanded(
+                      child: minerMeta('marketLocked'.tr,
+                          formatFil(marketLocked, size: 2),
+                          bordered: false)),
+                ],
+              )),
               SizedBox(
                 height: 12,
               ),

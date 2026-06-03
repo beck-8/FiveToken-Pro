@@ -786,6 +786,21 @@ class FilecoinProvider {
     return res;
   }
 
+  /// Storage-market escrow / locked balance for an address (like the "Market
+  /// Balance" in `lotus-miner info`), from StateMarketBalance.
+  Future<Map<String, String>> getMarketBalance(String address) async {
+    try {
+      var res = await _call('StateMarketBalance', [address, _head]);
+      if (res is Map) {
+        return {
+          'escrow': (res['Escrow'] ?? '0').toString(),
+          'locked': (res['Locked'] ?? '0').toString(),
+        };
+      }
+    } catch (_) {}
+    return {'escrow': '0', 'locked': '0'};
+  }
+
   /// Multisig deposit history — removed (needs an indexer).
   Future<List<Map<String, dynamic>>> getMultiReceiveMessages(
       {@required String actor,
