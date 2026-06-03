@@ -217,13 +217,7 @@ class MesMakePageState extends State<MesMakePage> {
         return;
       }
       to = FilecoinAccount.f04;
-      params = jsonEncode({
-        "Peer": null,
-        "Owner": from,
-        "Worker": w,
-        "Multiaddrs": null,
-        "WindowPoStProofType": int.parse(sealType)
-      });
+      params = FilParams.createMiner(from, w, int.parse(sealType));
     }
     if (method == '3') {
       var newWorker = worker.text.trim();

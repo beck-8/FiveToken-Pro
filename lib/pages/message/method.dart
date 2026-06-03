@@ -60,14 +60,13 @@ class MethodSelectPageState extends State<MethodSelectPage> {
   }
 
   List<String> get _methods {
-    // '2' (CreateMiner) removed: it needs Power-actor CreateMiner CBOR params
-    // that only the dead backend produced, so it cannot be built locally.
     return [
       '0',
       '16',
       '23',
       '3',
       '21',
+      '2',
     ];
   }
 

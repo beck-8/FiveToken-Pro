@@ -192,6 +192,26 @@ class FilParams {
     return Cbor.toBase64(Cbor.address(newOwner));
   }
 
+  /// Storage Power Actor `CreateMiner` (method 2 on f04):
+  /// [Owner, Worker, WindowPoStProofType, Peer, [Multiaddrs...]]
+  static String createMiner(String owner, String worker, int postProofType,
+      {List<int> peer, List<List<int>> multiaddrs}) {
+    final p = peer ?? <int>[];
+    final ma = multiaddrs ?? <List<int>>[];
+    final bytes = <int>[
+      ...Cbor.arrayHeader(5),
+      ...Cbor.address(owner),
+      ...Cbor.address(worker),
+      ...Cbor.uint(postProofType),
+      ...Cbor.byteString(p),
+      ...Cbor.arrayHeader(ma.length),
+    ];
+    for (final m in ma) {
+      bytes.addAll(Cbor.byteString(m));
+    }
+    return Cbor.toBase64(bytes);
+  }
+
   /// Miner Actor `ChangeWorkerAddress` (method 3):
   /// [NewWorker, [ControlAddresses...]]
   static String changeWorker(String newWorker, List<String> controlAddrs) {
