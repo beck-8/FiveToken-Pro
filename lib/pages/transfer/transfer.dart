@@ -80,6 +80,17 @@ class FilTransferNewPageState extends State<FilTransferNewPage>
         gasFeeCap: controller.gas.value.feeCap,
         gasLimit: controller.gas.value.gasLimit,
         gasPremium: controller.gas.value.premium);
+    // Re-estimate gas on the actual message (real value/recipient). The page
+    // estimate uses value 0 and can be too low (e.g. funding a new account),
+    // which caused SysErrOutOfGas. Fall back to the page estimate on failure.
+    try {
+      var realGas = await Global.provider.estimateGas(msg);
+      msg.gasFeeCap = realGas.feeCap;
+      msg.gasLimit = realGas.gasLimit;
+      msg.gasPremium = realGas.premium;
+    } catch (e) {
+      print(e);
+    }
 
     try {
       await Global.provider.sendMessage(

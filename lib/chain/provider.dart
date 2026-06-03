@@ -408,13 +408,21 @@ class FilecoinProvider {
       if (res is Map) {
         return Gas(
             feeCap: (res['GasFeeCap'] ?? '0').toString(),
-            gasLimit: res['GasLimit'] ?? 0,
+            gasLimit: _gasLimitWithMargin(res['GasLimit']),
             premium: (res['GasPremium'] ?? '0').toString());
       }
       throw Exception('get gas fail');
     } catch (e) {
       throw (e);
     }
+  }
+
+  /// Safety margin applied to the node's estimated gas limit, to avoid
+  /// SysErrOutOfGas when on-chain execution costs a little more than the
+  /// estimate (e.g. funding a brand-new recipient).
+  int _gasLimitWithMargin(dynamic gasLimit) {
+    var gl = gasLimit is int ? gasLimit : 0;
+    return (gl * 1.25).round();
   }
 
   /// Estimate gas for a FULLY-BUILT message (real params + value). Required for
@@ -429,7 +437,7 @@ class FilecoinProvider {
     if (res is Map) {
       return Gas(
           feeCap: (res['GasFeeCap'] ?? '0').toString(),
-          gasLimit: res['GasLimit'] ?? 0,
+          gasLimit: _gasLimitWithMargin(res['GasLimit']),
           premium: (res['GasPremium'] ?? '0').toString());
     }
     throw Exception('estimate gas fail');
@@ -596,7 +604,7 @@ class FilecoinProvider {
             nonce: res['Nonce'] ?? 0,
             gasFeeCap: (res['GasFeeCap'] ?? '0').toString(),
             gasPremium: (res['GasPremium'] ?? '0').toString(),
-            gasLimit: res['GasLimit'] ?? 0);
+            gasLimit: _gasLimitWithMargin(res['GasLimit']));
       }
       throw Exception('build message fail');
     } catch (e) {
