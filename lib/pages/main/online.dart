@@ -265,7 +265,9 @@ class OnlineWalletState extends State<OnlineWallet> with RouteAware {
       var list = await Global.provider
           .getMessageList(actor: $store.addr, mid: mid, direction: direction);
       if (list.isNotEmpty) {
-        var maxNonce = 0;
+        // -1 so a still-unconfirmed first message (nonce 0) is not wrongly
+        // deleted when the indexer has no sent messages for this account yet.
+        var maxNonce = -1;
         var messages = list.map((e) {
           var mes = StoreMessage.fromJson(e);
           mes.pending = 0;

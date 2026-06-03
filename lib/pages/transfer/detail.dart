@@ -315,11 +315,37 @@ class FilDetailPageState extends State<FilDetailPage> {
                         ? ''
                         : msgDetail.height.toString(),
                     params: null)
-                : CommonCard(MessageRow(
-                    label: 'cid'.tr,
-                    selectable: true,
-                    value: msgDetail.signedCid,
-                  )),
+                : Column(
+                    children: [
+                      CommonCard(MessageRow(
+                        label: 'cid'.tr,
+                        selectable: true,
+                        value: msgDetail.signedCid,
+                      )),
+                      SizedBox(height: 7),
+                      // The cid is known while pending, so allow viewing it on
+                      // the explorer (filfox indexes recently included messages).
+                      GestureDetector(
+                        onTap: () {
+                          goFilScan(msgDetail);
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          height: 48,
+                          child: CommonText(
+                            'filscan'.tr,
+                            size: 14,
+                            weight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                          decoration: BoxDecoration(
+                              color: CustomColor.primary,
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ],
+                  ),
           ],
         ),
       ),
