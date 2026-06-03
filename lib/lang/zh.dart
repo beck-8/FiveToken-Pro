@@ -14,7 +14,8 @@ const Map<String, String> ZH_LANG = {
   'switchNetworkSucc': '网络已切换',
   'deleteNetwork': '删除网络',
   'addNetworkSucc': '添加成功',
-  'marketEscrow': '市场可用',
+  'marketAvailable': '市场可用',
+  'marketEscrow': '市场总额',
   'marketLocked': '市场锁定',
   'marketWithdraw': '市场提现',
   //wallet

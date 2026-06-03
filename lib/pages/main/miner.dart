@@ -24,6 +24,19 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
   List<MinerAddress> relatedList = [];
   String get addr => $store.wal.addrWithNet;
   RefreshController rc;
+
+  /// Withdrawable storage-market balance = Escrow (total) - Locked.
+  String get marketAvailable {
+    try {
+      var a = BigInt.parse(marketEscrow) - BigInt.parse(marketLocked);
+      if (a < BigInt.zero) {
+        a = BigInt.zero;
+      }
+      return a.toString();
+    } catch (e) {
+      return '0';
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -135,6 +148,9 @@ class MinerAddressStatsState extends State<MinerAddressStats> {
               ),
               MinerBoard(Row(
                 children: [
+                  Expanded(
+                      child: minerMeta('marketAvailable'.tr,
+                          formatFil(marketAvailable, size: 2))),
                   Expanded(
                       child: minerMeta('marketEscrow'.tr,
                           formatFil(marketEscrow, size: 2))),
