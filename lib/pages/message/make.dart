@@ -21,7 +21,9 @@ class MesMakePageState extends State<MesMakePage> {
   Wallet wallet = $store.wal;
   TextEditingController worker = TextEditingController();
   List<TextEditingController> controllers = [TextEditingController()];
-  String sealType = '8';
+  // 13 = StackedDRGWindow32GiBV1_1, 14 = 64GiB; the V1 types (8/9) are no longer
+  // allowed for new miner actors.
+  String sealType = '13';
   bool preventNext = false;
   Timer timer;
   BigInt fromBalance = BigInt.zero;
@@ -117,7 +119,7 @@ class MesMakePageState extends State<MesMakePage> {
     var value = valueCtrl.text.trim();
     var params = '';
     var prefix = 'from'.tr;
-    if (!['0', '16', '24'].contains(method)) {
+    if (!['0', '16', '24', '2'].contains(method)) {
       value = '0';
     }
     if (from == '') {
@@ -535,7 +537,10 @@ class MesMakePageState extends State<MesMakePage> {
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp("[0-9.]"))
                           ]),
-                      visible: method == '0' || method == '16' || method == '24',
+                      visible: method == '0' ||
+                          method == '16' ||
+                          method == '24' ||
+                          method == '2',
                     ),
                     SizedBox(
                       height: 10,
@@ -795,13 +800,13 @@ class CreateMiner extends StatelessWidget {
           Spacer(),
           Radio(
               activeColor: CustomColor.primary,
-              value: "8",
+              value: "13",
               groupValue: sealType,
               onChanged: onChange),
           CommonText.main('32G'),
           Radio(
             activeColor: CustomColor.primary,
-            value: "9",
+            value: "14",
             groupValue: sealType,
             onChanged: onChange,
           ),
