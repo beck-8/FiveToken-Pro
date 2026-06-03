@@ -19,6 +19,11 @@ const String DefaultRpcUrl = 'https://api.node.glif.io/rpc/v1';
 /// explorer" links; the wallet itself never depends on it.
 String get filscanWeb =>
     Global.netPrefix == 'f' ? 'https://filfox.info' : 'https://calibration.filfox.info';
+
+/// Optional "view on explorer" links (filfox). The wallet never depends on
+/// these; they just open a public explorer in a webview.
+String explorerMessageUrl(String cid) => '$filscanWeb/en/message/$cid';
+String explorerAddressUrl(String addr) => '$filscanWeb/en/address/$addr';
 class Global {
   static String version = "v2.2.0";
 

@@ -8,7 +8,8 @@ class MethodMap {
         '3': 'changeWorker'.tr,
         '16': 'withdraw'.tr,
         '21': 'confirmUpdateWorkerKey'.tr,
-        '23': 'changeOwner'.tr
+        '23': 'changeOwner'.tr,
+        '24': 'marketWithdraw'.tr
       };
   String getMethodDes(String method, {String to}) {
     var des = _methodMap[method];

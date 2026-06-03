@@ -58,8 +58,7 @@ class FilDetailPageState extends State<FilDetailPage> {
   }
 
   void goFilScan(MessageDetail m) {
-    var url =
-        "$filscanWeb/tipset/message-detail?cid=${m.signedCid}&utm_source=filwallet_app";
+    var url = explorerMessageUrl(m.signedCid);
 
     goWebviewPage(url: url, title: 'detail'.tr);
   }
@@ -418,8 +417,7 @@ class ChainMeta extends StatelessWidget {
   final String height;
   final dynamic params;
   void goFilScan() {
-    var url =
-        "$filscanWeb/tipset/message-detail?cid=$cid&utm_source=filwallet_app";
+    var url = explorerMessageUrl(cid);
     goWebviewPage(url: url, title: 'detail'.tr);
   }
 

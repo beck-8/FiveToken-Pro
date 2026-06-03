@@ -433,8 +433,7 @@ class ApproveStatus extends StatelessWidget {
                 child: Icon(Icons.more_horiz),
               ),
               onTap: () {
-                var url =
-                    "$filscanWeb/tipset/message-detail?cid=$cid&utm_source=filwallet_app";
+                var url = explorerMessageUrl(cid);
                 goWebviewPage(url: url, title: 'detail'.tr);
               },
             )

@@ -117,7 +117,7 @@ class MesMakePageState extends State<MesMakePage> {
     var value = valueCtrl.text.trim();
     var params = '';
     var prefix = 'from'.tr;
-    if (!['0', '16'].contains(method)) {
+    if (!['0', '16', '24'].contains(method)) {
       value = '0';
     }
     if (from == '') {
@@ -136,7 +136,7 @@ class MesMakePageState extends State<MesMakePage> {
       showCustomError('errorAddr'.tr);
       return;
     }
-    if (value == '' && ['0', '16'].contains(method)) {
+    if (value == '' && ['0', '16', '24'].contains(method)) {
       showCustomError('enterValidAmount'.tr);
       return;
     }
@@ -249,15 +249,25 @@ class MesMakePageState extends State<MesMakePage> {
       params = FilParams.changeWorker(worker.text.trim(),
           controllers.map((ctrl) => ctrl.text.trim()).toList());
     }
+    var sendTo = to;
+    var sendMethod = int.parse(method);
+    if (method == '24') {
+      // storage-market withdraw: the message targets the market actor (f05);
+      // the params carry the provider (miner) address + amount.
+      params = FilParams.marketWithdraw(to, requestValue);
+      sendTo = marketActorAddress;
+      sendMethod = 3;
+      value = '0';
+    }
     try {
       var res = await Global.provider.buildMessage({
         'from': from,
-        'to': to,
+        'to': sendTo,
         'value': fil2Atto(value),
-        'method': int.parse(method),
+        'method': sendMethod,
         'params': params == '' ? null : params
       });
-      if (method == '16') {
+      if (method == '16' || method == '24') {
         // keep a human-readable args for the local history display
         res.args = '{"AmountRequested": "$requestValue"}';
       }
@@ -529,7 +539,7 @@ class MesMakePageState extends State<MesMakePage> {
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp("[0-9.]"))
                           ]),
-                      visible: method == '0' || method == '16',
+                      visible: method == '0' || method == '16' || method == '24',
                     ),
                     SizedBox(
                       height: 10,

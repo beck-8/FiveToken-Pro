@@ -67,8 +67,7 @@ class DrawerBody extends StatelessWidget {
           DrawerItem(
             onTap: () {
               Get.back();
-              var url =
-                  '$filscanWeb/tipset/address-detail?address=$addr&utm_source=filwallet_app';
+              var url = explorerAddressUrl(addr);
               goWebviewPage(title: 'detail'.tr, url: url);
             },
             label: 'filscan'.tr,

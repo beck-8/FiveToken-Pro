@@ -137,6 +137,7 @@ class MainPageState extends State<MainPage> {
                                       title: 'opOption'.tr,
                                       methods: [
                                         '16',
+                                        '24',
                                         '23',
                                         '3',
                                         '21',
