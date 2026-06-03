@@ -511,6 +511,30 @@ class FilecoinProvider {
     } catch (e) {
       detail.pending = 1;
     }
+    // Total gas fee paid: deterministic but non-trivial to compute on-chain
+    // (needs the tipset base fee + the burn formula). filfox already exposes the
+    // breakdown, and the history list is filfox-sourced, so reuse it here.
+    var base = filfoxApi;
+    if (base != null && detail.pending != 1) {
+      try {
+        var fx = await Dio().get('$base/message/$cid');
+        var data = fx.data;
+        if (data is String) {
+          data = jsonDecode(data);
+        }
+        if (data is Map && data['fee'] is Map) {
+          var fee = data['fee'];
+          var total = BigInt.parse((fee['baseFeeBurn'] ?? '0').toString()) +
+              BigInt.parse((fee['minerTip'] ?? '0').toString()) +
+              BigInt.parse((fee['overEstimationBurn'] ?? '0').toString());
+          detail.baseFeeBurn = (fee['baseFeeBurn'] ?? '0').toString();
+          detail.minerTip = (fee['minerTip'] ?? '0').toString();
+          detail.overEstimationBurn =
+              (fee['overEstimationBurn'] ?? '0').toString();
+          detail.allGasFee = total.toString();
+        }
+      } catch (_) {}
+    }
     return detail;
   }
 
