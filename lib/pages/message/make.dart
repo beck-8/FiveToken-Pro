@@ -277,7 +277,9 @@ class MesMakePageState extends State<MesMakePage> {
       dismissAllToast();
       return res;
     } catch (e) {
-      showCustomError('makeFail'.tr);
+      // surface the real chain/RPC error instead of a generic message
+      dismissAllToast();
+      showCustomError(getErrorMessage(e.toString()));
       print(e);
     }
   }
