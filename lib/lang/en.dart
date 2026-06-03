@@ -197,7 +197,7 @@ const Map<String, String> EN_LANG = {
   'readonlyW': 'Readonly Account',
   'minerW': 'Peer',
   'offlineW': 'Offline Account',
-  'discovery': 'Discovery',
+  'discovery': 'Advanced',
   'create': 'Create Account',
   'importReadonly': 'Import Readonly Account',
   'importMiner': 'Import Peer',

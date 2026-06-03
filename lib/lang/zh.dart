@@ -188,7 +188,7 @@ const Map<String, String> ZH_LANG = {
   'readonlyW': '只读账户',
   'minerW': '节点',
   'offlineW': '离线账户',
-  'discovery': '发现',
+  'discovery': '高级功能',
   'create': '创建账户',
   'importReadonly': '导入只读账户',
   'importMiner': '导入节点',
