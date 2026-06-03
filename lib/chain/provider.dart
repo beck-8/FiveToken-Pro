@@ -901,6 +901,18 @@ class FilecoinProvider {
       if (addr == null) return;
       var a = addr.toString();
       if (a == '' || a == '<empty>') return;
+      // StateMinerInfo returns ID addresses (f0). Resolve account actors to
+      // their robust pubkey form (f1/f3) so they match the imported wallet's
+      // addrWithNet — needed for display, owner auto-fill and the sign check.
+      var robust = a;
+      if (a.length > 2 && a[1] == '0') {
+        try {
+          var r = await _call('StateAccountKey', [a, _head]);
+          if (r is String && r != '') {
+            robust = r;
+          }
+        } catch (_) {}
+      }
       var bal = '0';
       try {
         var act = await _call('StateGetActor', [a, _head]);
@@ -908,7 +920,7 @@ class FilecoinProvider {
           bal = act['Balance'].toString();
         }
       } catch (_) {}
-      var m = MinerAddress(address: a, type: type, balance: bal);
+      var m = MinerAddress(address: robust, type: type, balance: bal);
       m.miner = actor;
       result.add(m);
     }
