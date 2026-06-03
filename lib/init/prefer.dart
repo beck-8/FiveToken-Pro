@@ -4,6 +4,8 @@ Future<String> initSharedPreferences() async {
   var initialRoute = mainPage;
   var instance = await SharedPreferences.getInstance();
   Global.store = instance;
+  // Resolve the active network (built-in or user custom) before any RPC call.
+  loadSelectedNetwork();
   Global.registerId = Global.store.getString('registerId') ?? "";
   if (instance.getInt('passWrongCount') == null) {
     instance.setInt('passWrongCount', 0);

@@ -8,12 +8,17 @@ const SignSecp = "secp";
 const SignBls = "bls";
 const SignTypeBls = 2;
 const SignTypeSecp = 1;
+/// Default address prefix, used only as a fallback before a network is loaded.
 const String NetPrefix = 'f';
 
+/// Default RPC endpoint, used only as a fallback before a network is loaded.
+const String DefaultRpcUrl = 'https://api.node.glif.io/rpc/v1';
 
-var filscanWeb = Global.netPrefix == 'f'
-    ? "https://m.filscan.io"
-    : "https://calibration.filscan.io/mobile";
+/// Block explorer base, derived from the active network prefix.
+/// Explorer is external infrastructure and only used for optional "view on
+/// explorer" links; the wallet itself never depends on it.
+String get filscanWeb =>
+    Global.netPrefix == 'f' ? 'https://filfox.info' : 'https://calibration.filfox.info';
 class Global {
   static String version = "v2.2.0";
 
@@ -30,7 +35,19 @@ class Global {
   static String os;
   static String registerId;
   static MultiSignWallet currrentMultiSignWallet;
-  static String get netPrefix => NetPrefix;
+
+  /// The active network. Set during startup (see loadSelectedNetwork) and
+  /// when the user switches networks (see switchNetwork).
+  static Network currentNetwork;
+
+  /// Address prefix of the active network ('f' mainnet, 't' calibration).
+  static String get netPrefix =>
+      currentNetwork != null ? currentNetwork.prefix : NetPrefix;
+
+  /// Lotus JSON-RPC endpoint of the active network. The wallet's ONLY external
+  /// dependency. Read dynamically so a network switch takes effect immediately.
+  static String get rpcUrl =>
+      currentNetwork != null ? currentNetwork.rpcUrl : DefaultRpcUrl;
   static String activeWalletAddress;
   static String langCode;
   static String mode;

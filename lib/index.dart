@@ -35,4 +35,5 @@ export './common/index.dart';
 export './event/index.dart';
 export './chain/provider.dart';
 export './chain/constant.dart';
+export './chain/cbor.dart';
 export './conf/conf.dart';

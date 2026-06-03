@@ -20,6 +20,7 @@ const multiProposeBox = 'multiProposeBox';
 const minerAddressBox = 'minerAddressBox';
 const multiApproveBox = 'multiApproveBox';
 const minerBalanceBox = '';
+const networkBox = 'networkBox';
 
 /// init hive db
 Future initHive() async {
@@ -41,6 +42,7 @@ Future initHive() async {
   Hive.registerAdapter(CacheMultiMessageAdapter());
   Hive.registerAdapter(MultiApproveMessageAdapter());
   Hive.registerAdapter(MinerSelfBalanceAdapter());
+  Hive.registerAdapter(NetworkAdapter());
   await Hive.openBox<StoreMessage>(messageBox);
   await Hive.openBox<Wallet>(addressBox);
   await Hive.openBox<SignedMessage>(signedMessageBox);
@@ -57,7 +59,10 @@ Future initHive() async {
   await Hive.openBox<MinerAddress>(minerAddressBox);
   await Hive.openBox<MultiApproveMessage>(multiApproveBox);
   await Hive.openBox<MinerSelfBalance>(minerBalanceBox);
+  await Hive.openBox<Network>(networkBox);
   OpenedBox.initBox();
+  // Seed the two built-in networks (mainnet/calibration) on first run.
+  seedBuiltinNetworks();
   // OpenedBox.addressInsance.deleteFromDisk();
   // OpenedBox.multiMesInsance.deleteFromDisk();
   // OpenedBox.multiInsance.deleteFromDisk();
@@ -115,6 +120,9 @@ class OpenedBox {
 
   /// box to store miner balance
   static Box<MinerSelfBalance> minerBalanceInstance;
+
+  /// box to store networks (built-in + user custom RPC)
+  static Box<Network> networkInstance;
   static void initBox() {
     messageInsance = Hive.box<StoreMessage>(messageBox);
     addressInsance = Hive.box<Wallet>(addressBox);
@@ -132,5 +140,6 @@ class OpenedBox {
     minerAddressInstance = Hive.box<MinerAddress>(minerAddressBox);
     multiApproveInstance = Hive.box<MultiApproveMessage>(multiApproveBox);
     minerBalanceInstance = Hive.box<MinerSelfBalance>(minerBalanceBox);
+    networkInstance = Hive.box<Network>(networkBox);
   }
 }

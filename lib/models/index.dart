@@ -5,5 +5,6 @@ export './private.dart';
 export './gas.dart';
 export './nonce.dart';
 export './miner.dart';
+export './network.dart';
 typedef Noop = void Function();
 typedef SingleParamCallback<T> =void Function(T param);

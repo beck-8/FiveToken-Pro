@@ -10,6 +10,7 @@ import './init.dart';
 import './pass.dart';
 import './wallet.dart';
 import './address.dart';
+import './network.dart';
 import './sign.dart';
 
 class GetTranstionPage {}
@@ -28,6 +29,7 @@ List<GetPage> initRoutes() {
     //..addAll(getDiscoveryRoute())
     ..addAll(getWalletRoutes())
     ..addAll(getAddressBookRoutes())
+    ..addAll(getNetworkRoutes())
     ..addAll(getSignRoutes())
     ..addAll(getPassRoutes());
   return list;

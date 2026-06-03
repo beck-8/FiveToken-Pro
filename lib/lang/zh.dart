@@ -1,4 +1,19 @@
 const Map<String, String> ZH_LANG = {
+  //network
+  'networkManage': '网络管理',
+  'network': '网络',
+  'addNetwork': '添加网络',
+  'editNetwork': '编辑网络',
+  'networkName': '网络名称',
+  'enterNetworkName': '请输入网络名称',
+  'rpcUrl': 'RPC 节点地址',
+  'enterRpcUrl': '请输入正确的 RPC 节点地址(http/https)',
+  'networkType': '网络类型',
+  'mainnet': '主网',
+  'calibration': '测试网(Calibration)',
+  'switchNetworkSucc': '网络已切换',
+  'deleteNetwork': '删除网络',
+  'addNetworkSucc': '添加成功',
   //wallet
   'wallet': "账户",
   'enterName': '请输入账户名称',

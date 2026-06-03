@@ -52,6 +52,19 @@ class SetPageState extends State<SetPage> {
                   SizedBox(
                     height: 15,
                   ),
+                  TapCard(
+                    items: [
+                      CardItem(
+                        label: 'networkManage'.tr,
+                        onTap: () {
+                          Get.toNamed(networkListPage);
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
                   // TapCard(
                   //   items: [
                   //     CardItem(
