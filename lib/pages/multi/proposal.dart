@@ -307,6 +307,13 @@ class MultiProposalPageState extends State<MultiProposalPage> {
         gasFeeCap: controller.gas.value.feeCap,
         gasLimit: controller.gas.value.gasLimit,
         gasPremium: controller.gas.value.premium);
+    // Estimate gas on the real Propose message (empty-params estimate fails).
+    var realGas = await Global.provider.estimateGas(msg);
+    msg.gasFeeCap = realGas.feeCap;
+    msg.gasLimit = realGas.gasLimit;
+    msg.gasPremium = realGas.premium;
+    $store.setGas(realGas);
+    $store.setChainGas(realGas);
     return msg;
   }
 

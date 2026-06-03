@@ -417,6 +417,24 @@ class FilecoinProvider {
     }
   }
 
+  /// Estimate gas for a FULLY-BUILT message (real params + value). Required for
+  /// parametrized methods (Exec/Propose/Approve/...) where estimating with empty
+  /// params fails ("method expects arguments").
+  Future<Gas> estimateGas(TMessage msg) async {
+    var m = msg.toLotusMessage();
+    m['GasLimit'] = 0;
+    m['GasFeeCap'] = '0';
+    m['GasPremium'] = '0';
+    var res = await _call('GasEstimateMessageGas', [m, null, _head]);
+    if (res is Map) {
+      return Gas(
+          feeCap: (res['GasFeeCap'] ?? '0').toString(),
+          gasLimit: res['GasLimit'] ?? 0,
+          premium: (res['GasPremium'] ?? '0').toString());
+    }
+    throw Exception('estimate gas fail');
+  }
+
   Future<MultiWalletInfo> getMultiInfo(String addr) async {
     try {
       var rs = await _call('StateReadState', [addr, _head]);

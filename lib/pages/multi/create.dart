@@ -63,6 +63,13 @@ class MultiCreatePageState extends State<MultiCreatePage> {
         gasFeeCap: g.feeCap,
         gasLimit: g.gasLimit,
         gasPremium: g.premium);
+    // Gas must be estimated on the real Exec message (params present); an
+    // empty-params estimate fails, which left the fee at 0.
+    var realGas = await Global.provider.estimateGas(msg);
+    msg.gasFeeCap = realGas.feeCap;
+    msg.gasLimit = realGas.gasLimit;
+    msg.gasPremium = realGas.premium;
+    $store.setGas(realGas);
     return msg;
   }
 

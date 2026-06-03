@@ -85,6 +85,13 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
         gasFeeCap: ctrl.gas.value.feeCap,
         gasLimit: ctrl.gas.value.gasLimit,
         gasPremium: ctrl.gas.value.premium);
+    // Estimate gas on the real Approve message (empty-params estimate fails).
+    var realGas = await Global.provider.estimateGas(message);
+    message.gasFeeCap = realGas.feeCap;
+    message.gasLimit = realGas.gasLimit;
+    message.gasPremium = realGas.premium;
+    $store.setGas(realGas);
+    $store.setChainGas(realGas);
     return message;
   }
 
