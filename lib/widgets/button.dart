@@ -83,29 +83,8 @@ class DocButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.help_outline,
-              size: 20,
-              color: color ?? CustomColor.grey,
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            CommonText(
-              'helpCenter'.tr,
-              color: color ?? CustomColor.grey,
-            )
-          ],
-        ),
-        onTap: () {
-          goWebviewPage(url: link);
-        },
-      ),
-    );
+    // Help Center pointed to docs.fivetoken.io, which is offline. Hide it
+    // everywhere by rendering nothing.
+    return SizedBox.shrink();
   }
 }
