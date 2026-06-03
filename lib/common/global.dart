@@ -24,6 +24,16 @@ String get filscanWeb =>
 /// these; they just open a public explorer in a webview.
 String explorerMessageUrl(String cid) => '$filscanWeb/en/message/$cid';
 String explorerAddressUrl(String addr) => '$filscanWeb/en/address/$addr';
+
+/// filfox public explorer API base, for the few pieces of data a single RPC
+/// node cannot provide (historical message list, miner aggregate metrics).
+/// Null for networks filfox does not index (custom RPCs) -> those features stay
+/// empty rather than depending on anything. Everything else comes from chain.
+String get filfoxApi {
+  if (Global.netPrefix == 'f') return 'https://filfox.info/api/v1';
+  if (Global.netPrefix == 't') return 'https://calibration.filfox.info/api/v1';
+  return null;
+}
 class Global {
   static String version = "v2.2.0";
 

@@ -620,13 +620,62 @@ class FilecoinProvider {
   // build; the corresponding UI entry points are being removed/redirected.
   // ---------------------------------------------------------------------------
 
-  /// Transaction history list — removed (needs an indexer). Local cache only.
+  /// Historical message list for an address. A single RPC node cannot list an
+  /// address's past messages, so this is the one place the wallet reads from an
+  /// off-chain indexer (filfox public API), and only when filfox indexes the
+  /// active network. filfox is page-based, so only the latest page is returned
+  /// ("load older" is a no-op).
   Future<List<Map<String, dynamic>>> getMessageList(
       {@required String actor,
       String direction = 'down',
       String mid = '',
       int limit = 20}) async {
-    return <Map<String, dynamic>>[];
+    var base = filfoxApi;
+    if (base == null || direction == 'up') {
+      return <Map<String, dynamic>>[];
+    }
+    try {
+      var resp = await Dio().get('$base/address/$actor/messages',
+          queryParameters: {'pageSize': 50, 'page': 0});
+      var data = resp.data;
+      if (data is String) {
+        data = jsonDecode(data);
+      }
+      if (data is Map && data['messages'] is List) {
+        return (data['messages'] as List).map<Map<String, dynamic>>((m) {
+          var method = (m['method'] ?? '').toString();
+          // filfox decorates names, e.g. "WithdrawBalance (miner)" -> strip it
+          // so it matches FilecoinMethod.validMethods.
+          var idx = method.indexOf(' (');
+          if (idx > 0) {
+            method = method.substring(0, idx);
+          }
+          var exit = 0;
+          if (m['receipt'] is Map && m['receipt']['exitCode'] != null) {
+            exit = m['receipt']['exitCode'];
+          }
+          return <String, dynamic>{
+            'cid': m['cid'],
+            'to': m['to'],
+            'from': m['from'],
+            'value': (m['value'] ?? '0').toString(),
+            'block_time': m['timestamp'],
+            'exit_code': exit,
+            'owner': actor,
+            'params_json': null,
+            'pending': 0,
+            'method_name': method,
+            'nonce': m['nonce'],
+            'mid': m['cid'],
+            'mock': '',
+          };
+        }).toList();
+      }
+      return <Map<String, dynamic>>[];
+    } catch (e) {
+      print(e);
+      return <Map<String, dynamic>>[];
+    }
   }
 
   /// Map an actor method number to the FilecoinMethod name used by the UI.
