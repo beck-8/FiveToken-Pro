@@ -98,7 +98,7 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
   void pushMessage(String pass, {bool increaseNonce}) async {
     var message = await genMsg();
     var wal = $store.wal;
-    var private = await getPrivateKey(wal.addrWithNet, pass, wal.skKek);
+    var private = await getPrivateKey(wal.addr, pass, wal.skKek);
     try {
       await Global.provider.sendMessage(
           message: message,
@@ -179,7 +179,7 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
             showPassDialog(context, (String pass) async {
               var wal = $store.wal;
               var private =
-                  await getPrivateKey(wal.addrWithNet, pass, wal.skKek);
+                  await getPrivateKey(wal.addr, pass, wal.skKek);
               try {
                 await Global.provider.speedup(
                     private: private,

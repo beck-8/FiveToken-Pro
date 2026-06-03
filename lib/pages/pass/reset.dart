@@ -47,7 +47,7 @@ class PassResetPageState extends State<PassResetPage> {
       var pass = newCtrl.text.trim();
       var oldPass = oldCtrl.text.trim();
       var wal = $store.wal;
-      var addr = wal.addrWithNet;
+      var addr = wal.addr;
       var sk = await getPrivateKey(addr, oldPass, wal.skKek);
       var mne = aesDecrypt(wal.mne, sk);
       var newKek = await genKek(addr, pass);

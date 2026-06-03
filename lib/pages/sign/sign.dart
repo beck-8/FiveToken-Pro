@@ -52,7 +52,7 @@ class SignIndexPageState extends State<SignIndexPage> {
     var cid =
         await Flotus.messageCid(msg: jsonEncode(message.toLotusMessage()));
     var wal = $store.wal;
-    var ck = await getPrivateKey(wal.addrWithNet, pass, wal.skKek);
+    var ck = await getPrivateKey(wal.addr, pass, wal.skKek);
     if (message.from[1] == '1') {
       signType = SignTypeSecp;
       sign = await Flotus.secpSign(ck: ck, msg: cid);

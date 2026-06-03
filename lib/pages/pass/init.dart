@@ -41,7 +41,7 @@ class PassInitPageState extends State<PassInitPage> {
     }
     unFocusOf(context);
     String pass = passCtrl.text.trim();
-    var addr = wallet.addrWithNet;
+    var addr = wallet.addr;
     var ck = wallet.ck;
     var kek = await genKek(addr, pass);
     var pkList = base64Decode(ck);

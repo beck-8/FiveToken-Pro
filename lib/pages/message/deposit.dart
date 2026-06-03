@@ -89,7 +89,7 @@ class DepositPageState extends State<DepositPage> {
             gasLimit: g.gasLimit,
             gasPremium: g.premium);
 
-        var private = await getPrivateKey(wal.addrWithNet, pass, wal.skKek);
+        var private = await getPrivateKey(wal.addr, pass, wal.skKek);
         try {
           await Global.provider.sendMessage(
               message: msg,

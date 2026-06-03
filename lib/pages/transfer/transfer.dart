@@ -223,7 +223,7 @@ class FilTransferNewPageState extends State<FilTransferNewPage>
                 showPassDialog(context, (String pass) async {
                   var wal = $store.wal;
                   var ck =
-                      await getPrivateKey(wal.addrWithNet, pass, wal.skKek);
+                      await getPrivateKey(wal.addr, pass, wal.skKek);
                   speedup(ck);
                 });
               });
@@ -456,7 +456,7 @@ class ConfirmSheet extends StatelessWidget {
                         showPassDialog(context, (String pass) async {
                           var wal = $store.wal;
                           var ck = await getPrivateKey(
-                              wal.addrWithNet, pass, wal.skKek);
+                              wal.addr, pass, wal.skKek);
                           onConfirm(ck);
                         });
                       },

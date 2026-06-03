@@ -50,7 +50,7 @@ class WalletManagePageState extends State<WalletManagePage> {
           onTap: () {
             showPassDialog(context, (String pass) async {
               var sk =
-                  await getPrivateKey(wallet.addrWithNet, pass, wallet.skKek);
+                  await getPrivateKey(wallet.addr, pass, wallet.skKek);
               Get.toNamed(walletPrivatekey, arguments: {'pk': sk});
             }, from: wallet);
           }),
@@ -60,7 +60,7 @@ class WalletManagePageState extends State<WalletManagePage> {
             showPassDialog(context, (String pass) async {
               try {
                 var ck =
-                    await getPrivateKey(wallet.addrWithNet, pass, wallet.skKek);
+                    await getPrivateKey(wallet.addr, pass, wallet.skKek);
                 var mne = aesDecrypt(wallet.mne, ck);
                 Get.toNamed(walletMnePage, arguments: {'mne': mne});
               } catch (e) {
