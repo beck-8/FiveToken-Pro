@@ -33,7 +33,16 @@ class SignIndexPageState extends State<SignIndexPage> {
   void signMessage(String pass) async {
     var wallet = $store.wal;
     var signMode = Global.store.getInt('signMode');
-    if (message.from != wallet.addrWithNet) {
+    // Compare ignoring the network prefix (f/t): a signature is network-agnostic
+    // (the address bytes carry protocol+payload, not the f/t prefix), so the
+    // offline signer can be on a different network than the built message and
+    // still sign for the same key.
+    var fromPayload =
+        message.from.isNotEmpty ? message.from.substring(1) : message.from;
+    var walletPayload = wallet.addrWithNet.isNotEmpty
+        ? wallet.addrWithNet.substring(1)
+        : wallet.addrWithNet;
+    if (fromPayload != walletPayload) {
       showCustomError('fromNotMatch'.tr);
       return;
     }
