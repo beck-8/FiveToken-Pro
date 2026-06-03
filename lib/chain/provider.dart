@@ -641,6 +641,9 @@ class FilecoinProvider {
           : int.parse(data['method'].toString());
       var params = data['params'];
       var paramStr = params is String ? params : '';
+      // Use the sender's real next nonce; GasEstimateMessageGas does not set it,
+      // so building with a hard-coded 0 made every message nonce 0.
+      var nonce = await getNonce(from);
       var estMsg = <String, dynamic>{
         'Version': 0,
         'To': to,
@@ -650,7 +653,7 @@ class FilecoinProvider {
         'GasFeeCap': '0',
         'GasPremium': '0',
         'Params': paramStr,
-        'Nonce': 0,
+        'Nonce': nonce,
         'Method': method,
       };
       var res = await _call('GasEstimateMessageGas', [estMsg, null, _head]);
@@ -662,7 +665,7 @@ class FilecoinProvider {
             value: value,
             method: method,
             params: paramStr,
-            nonce: res['Nonce'] ?? 0,
+            nonce: res['Nonce'] ?? nonce,
             gasFeeCap: (res['GasFeeCap'] ?? '0').toString(),
             gasPremium: (res['GasPremium'] ?? '0').toString(),
             gasLimit: _gasLimitWithMargin(res['GasLimit']));
