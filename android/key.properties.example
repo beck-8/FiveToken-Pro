@@ -1,0 +1,22 @@
+# Release signing config.
+#
+# Only needed to produce a SIGNED RELEASE build (`flutter build apk --release`).
+# Debug builds (`flutter build apk --debug`) do NOT need this — they use the
+# local auto-generated debug key.
+#
+# Steps:
+#   1. Generate a keystore once and keep it PRIVATE (never commit it):
+#        keytool -genkey -v -keystore ~/fivetoken-release.jks \
+#          -keyalg RSA -keysize 2048 -validity 10000 -alias fivetoken
+#   2. Copy this file to android/key.properties and fill in the values below.
+#        cp android/key.properties.example android/key.properties
+#   3. flutter build apk --release
+#
+# android/key.properties is gitignored (repo-wide *.properties rule); the
+# keystore file must never be committed. All official releases must be signed
+# with the SAME keystore so users can update without reinstalling.
+
+storeFile=/absolute/path/to/fivetoken-release.jks
+storePassword=your-store-password
+keyAlias=fivetoken
+keyPassword=your-key-password
