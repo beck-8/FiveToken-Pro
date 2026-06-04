@@ -101,7 +101,7 @@ class PassDialogState extends State<PassDialog> {
 
     try {
       var valid = await validatePrivateKey(
-          wal.addrWithNet, pass, wal.skKek, wal.digest);
+          wal.addr, pass, wal.skKek, wal.digest);
       var instance = Global.store;
       var pre = instance.getInt('passWrongCount') ?? 0;
       if (!valid) {
