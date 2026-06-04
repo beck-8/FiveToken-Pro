@@ -79,21 +79,31 @@
 
 ## 关于签名
 
-Android APK 必须签名才能安装，没有“未签名”的可安装包。
+Android APK 必须签名才能安装，没有“未签名”的可安装包。包名对所有人都是 `io.fivetokenpro.fil`；真正决定**两个包能否原地互相覆盖更新（不卸载、不清钱包数据）**的是**签名 key**，不是包名。
 
-- **debug 编译**（`--debug`，以及不配 keystore 的 `--release`）：用本机自动生成的 **debug keystore**（`~/.android/debug.keystore`）签名。所有人的**包名都是 `io.fivetokenpro.fil`**，但每台机器的 debug key **各不相同**。后果：
-  - 同一台机器编出的包可以互相覆盖更新（同一 debug key）。
-  - **不同 debug key**（不同人/机器）编出的包**无法互相覆盖更新**，Android 会拒绝安装，必须先卸载（卸载会清空钱包数据）。
-- **release 编译**（可分发、可更新）：生成一个 release keystore，**自行妥善保管、切勿提交**，然后配置 `key.properties`：
+### 默认：仓库内置的共享 key
 
-  ```bash
-  keytool -genkey -v -keystore ~/fivetoken-release.jks \
-    -keyalg RSA -keysize 2048 -validity 10000 -alias fivetoken
-  cp android/key.properties.example android/key.properties   # 然后填写
-  flutter build apk --release
-  ```
+本仓库内置了一个共享 keystore **`android/fivetoken-shared.jks`**（alias `fivetoken`，密码都是 `fivetoken`）。**debug 与 release 默认都用它签名**，无需任何配置。因为大家用的是同一把 key，所以**任何人编出的包**（你帮别人编、或他以后自己重编）都能**原地覆盖更新、数据不丢**。
 
-  所有官方发布版本都应用**同一个 keystore** 签名，用户才能不卸载、不丢钱包地更新。`android/key.properties` 与 keystore 文件均已 gitignore。
+```bash
+flutter build apk --debug      # 用共享 key 签名
+flutter build apk --release    # 没有 key.properties 时也用共享 key
+```
+
+> ⚠️ 这把共享 key 是**公开**的，只为解决**编译/更新兼容**，**不提供防篡改保证**。签名一致**不能**证明安装包来自可信来源（任何人都能用这把 key 签）。请只安装你自己编译的、或来源可信的包；**不要**依赖它做钱包 App 的公开分发。
+
+### 可选：你自己的私有 release key
+
+要做你自己掌控的正式分发，用私有 keystore。只要存在 `android/key.properties`，**release** 就会改用它（debug 仍用共享 key）：
+
+```bash
+keytool -genkey -v -keystore ~/fivetoken-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias fivetoken
+cp android/key.properties.example android/key.properties   # 然后填写
+flutter build apk --release
+```
+
+私有 keystore 务必**妥善保管、切勿提交、做好备份**；所有正式版本都用**同一个** keystore 签，用户才能不卸载、不丢钱包地更新。`android/key.properties` 已 gitignore。
 
 ---
 

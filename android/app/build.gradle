@@ -51,9 +51,23 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
+       // Community shared key, committed to the repo. Both debug and release
+       // builds sign with this by default, so APKs built by ANYONE (you, or
+       // a user compiling later) carry the same signature and can update over
+       // each other in place WITHOUT uninstalling / wiping wallet data.
+       // NOTE: this key is public — a shared signature is not a proof of trust.
+       // It is for build/update compatibility, not anti-tampering. If you want
+       // your own private signing identity, drop in android/key.properties and
+       // release builds will use that instead (see android/key.properties.example).
+       shared {
+           keyAlias 'fivetoken'
+           keyPassword 'fivetoken'
+           storeFile rootProject.file('fivetoken-shared.jks')
+           storePassword 'fivetoken'
+       }
        release {
-           // Only configure release signing when a key.properties (+ keystore)
-           // is present; otherwise debug builds would fail evaluating file(null).
+           // Only configure release signing when a private key.properties
+           // (+ keystore) is present; otherwise file(null) would fail eval.
            if (keystorePropertiesFile.exists()) {
                keyAlias keystoreProperties['keyAlias']
                keyPassword keystoreProperties['keyPassword']
@@ -63,10 +77,14 @@ android {
        }
    }
     buildTypes {
+        debug {
+            // Use the shared key (not the per-machine ~/.android/debug.keystore)
+            // so debug APKs from different machines stay update-compatible.
+            signingConfig signingConfigs.shared
+        }
         release {
-            // Use the release keystore when available, else fall back to debug
-            // keys so `flutter build` works without a configured keystore.
-            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            // Private key.properties wins if provided; otherwise the shared key.
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.shared
         }
     }
 }

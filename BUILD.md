@@ -47,36 +47,53 @@ work):
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-## 4. Signing (important)
+## 4. Signing
 
-Android APKs must be signed; "unsigned" APKs can't be installed.
+Android APKs must be signed; "unsigned" APKs can't be installed. The package name
+is always `io.fivetokenpro.fil` for everyone — what decides whether two APKs can
+update over each other in place (without uninstalling and wiping wallet data) is
+the **signing key**, not the package name.
 
-- **Debug build** (`--debug`, and `--release` without a keystore): signed with
-  your machine's auto-generated **debug keystore** (`~/.android/debug.keystore`).
-  The **package name is always `io.fivetokenpro.fil`** for everyone, but every
-  machine's debug key is **different**. Consequence:
-  - APKs you build on one machine update over each other fine (same debug key).
-  - APKs from **different** debug keys (different people/machines) **cannot**
-    update over each other — Android rejects the install; you must uninstall
-    first, which wipes wallet data.
-- **Release build** (signed, shareable, updatable): create a release keystore
-  once, keep it **private** (never commit it), and configure `key.properties`:
+### Default: the committed community shared key
 
-  ```bash
-  keytool -genkey -v -keystore ~/fivetoken-release.jks \
-    -keyalg RSA -keysize 2048 -validity 10000 -alias fivetoken
-  cp android/key.properties.example android/key.properties   # then edit it
-  flutter build apk --release
-  # -> build/app/outputs/flutter-apk/app-release.apk
-  ```
+This repo ships a shared keystore at **`android/fivetoken-shared.jks`** (alias
+`fivetoken`, all passwords `fivetoken`). **Both** `--debug` and `--release` builds
+sign with it by default — no setup needed. Because everyone uses the same key,
+APKs built by anyone (you building for someone else, or that person rebuilding
+later) **update over each other in place and keep the wallet data**.
 
-  `android/key.properties` is gitignored. Sign **all** official releases with the
-  **same** keystore so users can update without reinstalling (and without losing
-  their wallets).
+```bash
+flutter build apk --debug      # signed with the shared key
+flutter build apk --release    # also the shared key, unless key.properties exists
+```
+
+> ⚠️ The shared key is **public** — it is for build/update *compatibility*, not
+> anti-tampering. A matching signature does **not** prove an APK came from a
+> trusted source, since anyone can sign with this key. Only install APKs you
+> built yourself or got from a source you trust. Do **not** rely on the shared
+> key for public distribution of a wallet app.
+
+### Optional: your own private release key
+
+For a real public release you control, use your own private keystore. If
+`android/key.properties` exists, **release** builds use it instead of the shared
+key (debug still uses the shared key):
+
+```bash
+keytool -genkey -v -keystore ~/fivetoken-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias fivetoken
+cp android/key.properties.example android/key.properties   # then edit it
+flutter build apk --release
+# -> build/app/outputs/flutter-apk/app-release.apk
+```
+
+`android/key.properties` is gitignored and the keystore must stay private and
+backed up. Sign **all** your official releases with the **same** keystore so
+users can update without reinstalling.
 
 ## 5. Choosing a network
 
-In the app: **Settings → Network** (设置 → 网络管理). Two networks are built in
+In the app: **Settings → Network**. Two networks are built in
 (Mainnet and Calibration, via public glif RPC) and you can add a custom RPC URL.
 Use **Calibration** for safe testing with testnet FIL.
 
