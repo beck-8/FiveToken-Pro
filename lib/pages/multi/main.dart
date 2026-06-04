@@ -612,6 +612,7 @@ class MultiWalletService extends StatelessWidget {
                     methods: [
                       '0',
                       '16',
+                      '24',
                       '23',
                       '3',
                       '21',
