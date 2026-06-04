@@ -609,14 +609,7 @@ class MultiWalletService extends StatelessWidget {
                 showMethodSelector(
                     title: 'proposalType'.tr,
                     context: context,
-                    methods: [
-                      '0',
-                      '16',
-                      '24',
-                      '23',
-                      '3',
-                      '21',
-                    ],
+                    methods: MethodMap.multisigProposeMethods,
                     onTap: (method) {
                       Get.toNamed(multiProposalPage,
                           arguments: {'method': method});

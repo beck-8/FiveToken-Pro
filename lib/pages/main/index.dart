@@ -139,13 +139,7 @@ class MainPageState extends State<MainPage> {
                                   showMethodSelector(
                                       context: context,
                                       title: 'opOption'.tr,
-                                      methods: [
-                                        '16',
-                                        '24',
-                                        '23',
-                                        '3',
-                                        '21',
-                                      ],
+                                      methods: MethodMap.minerOpMethods,
                                       onTap: (method) {
                                         Get.toNamed(mesMakePage, arguments: {
                                           'type': MessageType.MinerManage,

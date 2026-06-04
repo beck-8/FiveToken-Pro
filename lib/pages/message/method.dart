@@ -2,6 +2,26 @@ import 'package:fil/index.dart';
 
 /// select a method
 class MethodMap {
+  // Single source of truth for the op/proposal lists shown in each context.
+  // Add a new method to the relevant list(s) here, not at each call site.
+  static const List<String> minerOpMethods = ['16', '24', '23', '3', '21'];
+  static const List<String> multisigProposeMethods = [
+    '0',
+    '16',
+    '24',
+    '23',
+    '3',
+    '21'
+  ];
+  static const List<String> advancedMethods = [
+    '0',
+    '16',
+    '24',
+    '23',
+    '3',
+    '21',
+    '2'
+  ];
   static Map<String, String> get _methodMap => {
         '0': 'transfer'.tr,
         '2': 'createMiner'.tr,
@@ -63,17 +83,7 @@ class MethodSelectPageState extends State<MethodSelectPage> {
     });
   }
 
-  List<String> get _methods {
-    return [
-      '0',
-      '16',
-      '24',
-      '23',
-      '3',
-      '21',
-      '2',
-    ];
-  }
+  List<String> get _methods => MethodMap.advancedMethods;
 
   @override
   void initState() {
