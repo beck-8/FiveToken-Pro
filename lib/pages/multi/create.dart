@@ -44,14 +44,12 @@ class MultiCreatePageState extends State<MultiCreatePage> {
   Future<TMessage> genMsg() async {
     var value = '0';
     var threshold = int.parse(thresholdCtrl.text.trim());
-    var params = {
-      'signers': signerAddrs,
-      'threshold': threshold,
-      'unlock_duration': 0
-    };
 
-    /// serialize create params
-    var p = await Global.provider.getSerializeParams(params);
+    /// Build the init.Exec params locally with the CURRENT network multisig
+    /// code CID (fetched from chain). The Flotus genConstructorParamV3 embeds a
+    /// stale pre-FVM code CID, which the init actor rejects (ErrForbidden).
+    var codeCid = await Global.provider.getMultisigActorCid();
+    var p = FilParams.multisigExec(codeCid, signerAddrs, threshold);
     // Fetch the real sender nonce here so creation doesn't depend on a prior
     // getNonceAndGas — its gas estimate is on an Exec message with EMPTY params,
     // which GasEstimateMessageGas rejects (that's what surfaced as

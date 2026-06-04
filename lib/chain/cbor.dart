@@ -127,6 +127,28 @@ class Cbor {
   /// CBOR-encode an address (byte string of its raw bytes).
   static List<int> address(String addr) => byteString(addressBytes(addr));
 
+  /// CBOR tag header (major type 6).
+  static List<int> tag(int t) => header(6, t);
+
+  /// Decode a CID string to its raw binary form. Built-in actor code CIDs are
+  /// CIDv1 base32 ('b' multibase, RFC4648 lowercase, no padding).
+  static List<int> cidBytes(String cid) {
+    final c = cid.trim();
+    if (c.isEmpty) throw FormatException('empty CID');
+    if (c[0] != 'b') {
+      throw FormatException('unsupported CID multibase: ${c[0]}');
+    }
+    return _base32Decode(c.substring(1));
+  }
+
+  /// CBOR-encode a CID (DAG-CBOR): tag(42) + byteString(0x00 || cidBytes).
+  static List<int> cborCid(String cid) {
+    return [
+      ...tag(42),
+      ...byteString([0x00, ...cidBytes(cid)])
+    ];
+  }
+
   /// Base32 encode with the Filecoin alphabet (no padding) — inverse of
   /// [_base32Decode].
   static String _base32Encode(List<int> bytes) {
@@ -377,6 +399,31 @@ class FilParams {
       bytes.addAll(Cbor.byteString(m));
     }
     return Cbor.toBase64(bytes);
+  }
+
+  /// Init Actor `Exec` (method 2) params to create a multisig:
+  /// [CodeCID(multisig), ConstructorParams-bytes]. ConstructorParams =
+  /// [ [signers...], NumApprovalsThreshold, UnlockDuration, StartEpoch ].
+  /// [multisigCodeCid] must be the CURRENT network's multisig actor code CID
+  /// (the old Flotus lib hard-codes a stale pre-FVM CID, which the init actor
+  /// rejects with ErrForbidden).
+  static String multisigExec(
+      String multisigCodeCid, List<String> signers, int threshold,
+      {int unlockDuration = 0, int startEpoch = 0}) {
+    final ctor = <int>[
+      ...Cbor.arrayHeader(4),
+      ...Cbor.arrayHeader(signers.length),
+      for (final s in signers) ...Cbor.address(s),
+      ...Cbor.uint(threshold),
+      ...Cbor.uint(unlockDuration),
+      ...Cbor.uint(startEpoch),
+    ];
+    final exec = <int>[
+      ...Cbor.arrayHeader(2),
+      ...Cbor.cborCid(multisigCodeCid),
+      ...Cbor.byteString(ctor),
+    ];
+    return Cbor.toBase64(exec);
   }
 
   /// Miner Actor `ChangeWorkerAddress` (method 3):

@@ -704,6 +704,18 @@ class FilecoinProvider {
 
   /// Multisig constructor params, encoded locally by Flotus (replaces the dead
   /// backend `/message/msig/construct`).
+  /// Current multisig actor code CID for the active network. Public gateways
+  /// don't expose StateActorCodeCIDs, so read it from the genesis multisig f080
+  /// (a multisig on both mainnet and calibration). Needed for init.Exec —
+  /// the old Flotus lib embeds a stale pre-FVM code CID that the chain rejects.
+  Future<String> getMultisigActorCid() async {
+    var actor = await _call('StateGetActor', [Global.netPrefix + '080', _head]);
+    if (actor is Map && actor['Code'] is Map && actor['Code']['/'] != null) {
+      return actor['Code']['/'].toString();
+    }
+    throw Exception('cannot resolve multisig actor code cid');
+  }
+
   Future<String> getSerializeParams(Map<String, dynamic> data) async {
     try {
       var res = await Flotus.genConstructorParamV3(jsonEncode(data));
