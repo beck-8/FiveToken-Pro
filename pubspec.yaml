@@ -34,6 +34,9 @@ dependencies:
   dio: ^3.0.0
   event_bus: ^1.1.1
   crypto: 2.1.3
+  # blake2b-4 for decoding f1/f3 addresses out of on-chain CBOR params
+  # (matches the version already resolved transitively).
+  pointycastle: 1.0.2
   encrypt: ^4.0.0
   # flotus provides the native signing / CBOR library. The upstream
   # FiveToken/flotus ships a stale android/wlib/wlib.aar missing genCid /

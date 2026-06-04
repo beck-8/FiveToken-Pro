@@ -492,12 +492,12 @@ class FilecoinProvider {
         var params = (msg['Params'] ?? '').toString();
         detail.params = params;
         if (params.isNotEmpty) {
+          var prefix = Global.netPrefix;
           if (msg['Method'] == 16) {
             // miner WithdrawBalance: [AmountRequested]
             var amt = Cbor.decodeMinerWithdrawAmount(params);
             if (amt != null) detail.args = {'AmountRequested': amt};
-          } else if (msg['Method'] == 3 &&
-              detail.to == marketActorAddress) {
+          } else if (msg['Method'] == 3 && detail.to == marketActorAddress) {
             // market WithdrawBalance ([addr, Amount]) — render like a withdraw,
             // not a miner ChangeWorker (which is also method 3).
             var amt = Cbor.decodeMarketWithdrawAmount(params);
@@ -505,6 +505,12 @@ class FilecoinProvider {
               detail.methodName = FilecoinMethod.withdraw;
               detail.args = {'AmountRequested': amt};
             }
+          } else if (msg['Method'] == 23) {
+            // miner ChangeOwnerAddress: a single address.
+            detail.args = Cbor.decodeChangeOwner(params, prefix);
+          } else if (msg['Method'] == 3) {
+            // miner ChangeWorkerAddress: [NewWorker, [ControlAddrs...]]
+            detail.args = Cbor.decodeChangeWorker(params, prefix);
           }
         }
       }
@@ -828,6 +834,24 @@ class FilecoinProvider {
         var params = (t['Params'] ?? '').toString();
         var approved = t['Approved'] is List ? t['Approved'] as List : [];
         var proposer = approved.isNotEmpty ? approved[0].toString() : '';
+        // Decode the inner call params the proposal UI knows how to render.
+        // (params_params is read as: AmountRequested-map for withdraw, a raw
+        // address string for changeOwner, a NewWorker/NewControlAddrs map for
+        // changeWorker.)
+        var innerDecoded = '';
+        try {
+          var prefix = Global.netPrefix;
+          if (method == 16 && params.isNotEmpty) {
+            var amt = Cbor.decodeMinerWithdrawAmount(params);
+            if (amt != null) innerDecoded = jsonEncode({'AmountRequested': amt});
+          } else if (method == 23 && params.isNotEmpty) {
+            var owner = Cbor.decodeChangeOwner(params, prefix);
+            if (owner != null) innerDecoded = owner;
+          } else if (method == 3 && params.isNotEmpty) {
+            var cw = Cbor.decodeChangeWorker(params, prefix);
+            if (cw != null) innerDecoded = jsonEncode(cw);
+          }
+        } catch (_) {}
         // Subsequent approvers (excluding the proposer, who is counted as +1
         // in the UI's approveNum getter).
         var approves = <Map<String, dynamic>>[];
@@ -851,7 +875,7 @@ class FilecoinProvider {
           'params_json': jsonEncode(
               {'To': to, 'Value': value, 'Method': method, 'Params': params}),
           'params_method': _msigInnerMethodName(method),
-          'params_params': '',
+          'params_params': innerDecoded,
           'nonce': 0,
           'params_txnid': txid,
           'exit_code': 0,

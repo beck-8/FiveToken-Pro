@@ -113,7 +113,7 @@ class FilDetailPageState extends State<FilDetailPage> {
               ),
               MessageRow(
                 label: 'newOwner'.tr,
-                value: msgDetail.args.toString(),
+                value: msgDetail.args is String ? msgDetail.args : '-',
               ),
               // MessageRow(
               //   label: 'oldOwner'.tr,

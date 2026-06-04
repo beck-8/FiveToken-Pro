@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:pointycastle/digests/blake2b.dart';
 
 /// Self-contained CBOR encoder for Filecoin actor message parameters.
 ///
@@ -126,6 +127,53 @@ class Cbor {
   /// CBOR-encode an address (byte string of its raw bytes).
   static List<int> address(String addr) => byteString(addressBytes(addr));
 
+  /// Base32 encode with the Filecoin alphabet (no padding) — inverse of
+  /// [_base32Decode].
+  static String _base32Encode(List<int> bytes) {
+    var bits = 0;
+    var value = 0;
+    final out = StringBuffer();
+    for (final b in bytes) {
+      value = (value << 8) | (b & 0xff);
+      bits += 8;
+      while (bits >= 5) {
+        bits -= 5;
+        out.write(_b32Alphabet[(value >> bits) & 0x1f]);
+      }
+    }
+    if (bits > 0) {
+      out.write(_b32Alphabet[(value << (5 - bits)) & 0x1f]);
+    }
+    return out.toString();
+  }
+
+  /// Inverse of [addressBytes]: turn raw address bytes (protocol || payload)
+  /// back into a string address for the given network prefix ('f' / 't').
+  /// - protocol 0 (ID):  net + '0' + decimal(uvarint payload)
+  /// - protocol 1/2/3:   net + proto + base32(payload || blake2b-4(checksum))
+  static String addressFromBytes(List<int> bytes, String net) {
+    if (bytes == null || bytes.isEmpty) return '';
+    final protocol = bytes[0];
+    final payload = bytes.sublist(1);
+    if (protocol == 0) {
+      // uvarint -> decimal id
+      var result = BigInt.zero;
+      var shift = 0;
+      for (final b in payload) {
+        result |= BigInt.from(b & 0x7f) << shift;
+        if ((b & 0x80) == 0) break;
+        shift += 7;
+      }
+      return '${net}0$result';
+    }
+    final digest = Blake2bDigest(digestSize: 4);
+    final input = Uint8List.fromList([protocol, ...payload]);
+    digest.update(input, 0, input.length);
+    final checksum = Uint8List(4);
+    digest.doFinal(checksum, 0);
+    return '$net$protocol${_base32Encode([...payload, ...checksum])}';
+  }
+
   /// Minimal big-endian magnitude bytes of a non-negative BigInt (empty for 0).
   static List<int> _bigEndianMagnitude(BigInt v) {
     if (v == BigInt.zero) return <int>[];
@@ -198,6 +246,36 @@ class Cbor {
       if (r.readArrayHeader() < 2) return null;
       r.readByteString(); // address — not needed for display
       return decodeTokenAmount(r.readByteString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Decode `ChangeOwnerAddress` params (a single bare address byte string,
+  /// base64) into a string address. Returns null if unparseable.
+  static String decodeChangeOwner(String b64, String net) {
+    try {
+      final r = _CborReader(base64.decode(b64));
+      return addressFromBytes(r.readByteString(), net);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Decode `ChangeWorkerAddress` params `[NewWorker, [ControlAddrs...]]`
+  /// (base64) into {'NewWorker': addr, 'NewControlAddrs': [addr,...]}.
+  /// Returns null if unparseable.
+  static Map<String, dynamic> decodeChangeWorker(String b64, String net) {
+    try {
+      final r = _CborReader(base64.decode(b64));
+      if (r.readArrayHeader() < 2) return null;
+      final worker = addressFromBytes(r.readByteString(), net);
+      final n = r.readArrayHeader();
+      final controls = <String>[];
+      for (var i = 0; i < n; i++) {
+        controls.add(addressFromBytes(r.readByteString(), net));
+      }
+      return {'NewWorker': worker, 'NewControlAddrs': controls};
     } catch (_) {
       return null;
     }
