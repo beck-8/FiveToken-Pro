@@ -151,7 +151,11 @@ class MainPageState extends State<MainPage> {
                                           'type': MessageType.MinerManage,
                                           'from': '',
                                           'method': method,
-                                          'to': $store.wal.address
+                                          // current-network form (addrWithNet),
+                                          // so it passes isValidAddress and the
+                                          // owner lookup / chain calls all agree
+                                          // on the active network's prefix.
+                                          'to': $store.wal.addrWithNet
                                         });
                                       });
                                 },
