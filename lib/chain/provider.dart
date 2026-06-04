@@ -487,6 +487,26 @@ class FilecoinProvider {
         detail.gasFeeCap = (msg['GasFeeCap'] ?? '0').toString();
         detail.gasPremium = (msg['GasPremium'] ?? '0').toString();
         detail.gasLimit = msg['GasLimit'] ?? 0;
+        // Decode the params we know how to render. ChainGetMessage returns
+        // Params as base64 CBOR; the detail page reads detail.args as a Map.
+        var params = (msg['Params'] ?? '').toString();
+        detail.params = params;
+        if (params.isNotEmpty) {
+          if (msg['Method'] == 16) {
+            // miner WithdrawBalance: [AmountRequested]
+            var amt = Cbor.decodeMinerWithdrawAmount(params);
+            if (amt != null) detail.args = {'AmountRequested': amt};
+          } else if (msg['Method'] == 3 &&
+              detail.to == marketActorAddress) {
+            // market WithdrawBalance ([addr, Amount]) — render like a withdraw,
+            // not a miner ChangeWorker (which is also method 3).
+            var amt = Cbor.decodeMarketWithdrawAmount(params);
+            if (amt != null) {
+              detail.methodName = FilecoinMethod.withdraw;
+              detail.args = {'AmountRequested': amt};
+            }
+          }
+        }
       }
     } catch (_) {}
     // Status / height from the receipt.

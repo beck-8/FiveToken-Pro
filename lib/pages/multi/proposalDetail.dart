@@ -460,7 +460,8 @@ class MultiParams extends StatelessWidget {
       );
   Widget get withdrawWidget {
     if (methodName == FilecoinMethod.withdraw) {
-      var amount = msg.decodeInnerParams['AmountRequested'];
+      var inner = msg.decodeInnerParams;
+      var amount = (inner is Map) ? inner['AmountRequested'] : null;
       return Column(
         children: [
           CommonCard(Column(
@@ -472,7 +473,7 @@ class MultiParams extends StatelessWidget {
               ),
               MultiMessageRow(
                 label: 'withdrawNum'.tr,
-                value: formatFil(amount),
+                value: amount == null ? '-' : formatFil(amount),
               )
             ],
           )),

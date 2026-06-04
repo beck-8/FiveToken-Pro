@@ -75,7 +75,8 @@ class FilDetailPageState extends State<FilDetailPage> {
 
   Widget get withdrawWidget {
     if (methodName == FilecoinMethod.withdraw) {
-      amount = msgDetail.args['AmountRequested'];
+      var args = msgDetail.args;
+      amount = (args is Map) ? args['AmountRequested'] : null;
       return Column(
         children: [
           CommonCard(Column(
@@ -86,7 +87,7 @@ class FilDetailPageState extends State<FilDetailPage> {
               ),
               MessageRow(
                 label: 'withdrawNum'.tr,
-                value: formatFil(amount, returnRaw: true),
+                value: amount == null ? '-' : formatFil(amount, returnRaw: true),
               )
             ],
           )),

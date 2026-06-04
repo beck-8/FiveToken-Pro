@@ -161,6 +161,95 @@ class Cbor {
   }
 
   static String toBase64(List<int> bytes) => base64.encode(Uint8List.fromList(bytes));
+
+  // ---- minimal decoding (for displaying withdraw amounts on detail pages) ----
+
+  /// Decode a CBOR byte string holding a Filecoin TokenAmount
+  /// (sign byte + big-endian magnitude; empty => 0) into a decimal attoFIL
+  /// string.
+  static String decodeTokenAmount(List<int> bytes) {
+    if (bytes == null || bytes.isEmpty) return '0';
+    final negative = bytes[0] == 1;
+    var v = BigInt.zero;
+    for (var i = 1; i < bytes.length; i++) {
+      v = (v << 8) | BigInt.from(bytes[i] & 0xff);
+    }
+    if (negative) v = -v;
+    return v.toString();
+  }
+
+  /// Decode miner `WithdrawBalance` params `[AmountRequested]` (base64) into a
+  /// decimal attoFIL string. Returns null if it can't be parsed.
+  static String decodeMinerWithdrawAmount(String b64) {
+    try {
+      final r = _CborReader(base64.decode(b64));
+      if (r.readArrayHeader() < 1) return null;
+      return decodeTokenAmount(r.readByteString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Decode market `WithdrawBalance` params `[ProviderOrClient, Amount]`
+  /// (base64) into a decimal attoFIL string. Returns null if unparseable.
+  static String decodeMarketWithdrawAmount(String b64) {
+    try {
+      final r = _CborReader(base64.decode(b64));
+      if (r.readArrayHeader() < 2) return null;
+      r.readByteString(); // address — not needed for display
+      return decodeTokenAmount(r.readByteString());
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+/// Tiny sequential CBOR reader — only what the withdraw-amount decoders above
+/// need (definite-length arrays and byte strings). NOT a general decoder.
+class _CborReader {
+  final List<int> _b;
+  int _i = 0;
+  _CborReader(this._b);
+
+  int _readByte() => _b[_i++];
+
+  /// Returns [major, argument].
+  List<int> _readHeader() {
+    final h = _readByte();
+    final major = h >> 5;
+    final low = h & 0x1f;
+    int arg;
+    if (low < 24) {
+      arg = low;
+    } else if (low == 24) {
+      arg = _readByte();
+    } else if (low == 25) {
+      arg = (_readByte() << 8) | _readByte();
+    } else if (low == 26) {
+      arg = (_readByte() << 24) |
+          (_readByte() << 16) |
+          (_readByte() << 8) |
+          _readByte();
+    } else {
+      throw FormatException('unsupported cbor header arg: $low');
+    }
+    return [major, arg];
+  }
+
+  int readArrayHeader() {
+    final h = _readHeader();
+    if (h[0] != 4) throw FormatException('expected cbor array');
+    return h[1];
+  }
+
+  List<int> readByteString() {
+    final h = _readHeader();
+    if (h[0] != 2) throw FormatException('expected cbor byte string');
+    final len = h[1];
+    final out = _b.sublist(_i, _i + len);
+    _i += len;
+    return out;
+  }
 }
 
 /// Builders for the specific actor method params the app needs to send
