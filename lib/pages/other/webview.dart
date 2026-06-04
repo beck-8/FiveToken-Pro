@@ -1,5 +1,6 @@
 import 'package:fil/index.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebviewPage extends StatefulWidget {
@@ -56,6 +57,29 @@ class WebviewPageState extends State<WebviewPage> {
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               child: Row(
                 children: [
+                  GestureDetector(
+                    child: Icon(
+                      Icons.open_in_browser,
+                      color: Colors.black,
+                    ),
+                    onTap: () async {
+                      // Open the current page in the external browser, where text
+                      // is easy to copy. These are public, read-only pages.
+                      try {
+                        if (url != '') {
+                          await launch(url);
+                        }
+                      } catch (e) {
+                        print(e);
+                      }
+                    },
+                  ),
+                  Container(
+                    width: 1,
+                    height: 18,
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    color: CustomColor.grey,
+                  ),
                   GestureDetector(
                     child: Icon(
                       Icons.refresh,
