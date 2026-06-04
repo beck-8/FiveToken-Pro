@@ -28,9 +28,11 @@ class WalletManagePageState extends State<WalletManagePage> {
       Get.offAllNamed(initLangPage);
     } else {
       if (wal.addrWithNet == $store.wal.addrWithNet) {
-        var w = list.where((wal) => wal.addrWithNet != '').toList()[0];
+        var w = list.where((wal) => wal.addr != '').toList()[0];
         $store.setWallet(w);
-        Global.store.setString('activeWalletAddress', w.addrWithNet);
+        // Persist the STABLE address (the box key), not the network-prefixed
+        // form (see prefer.dart / index.dart).
+        Global.store.setString('activeWalletAddress', w.addr);
       }
       Get.back();
       showCustomToast('deleteSucc'.tr);

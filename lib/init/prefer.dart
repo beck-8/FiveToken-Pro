@@ -46,6 +46,24 @@ Future<String> initSharedPreferences() async {
     Wallet wallet;
     if (activeAddrStr != null) {
       wallet = OpenedBox.addressInsance.get(activeAddrStr);
+      if (wallet == null) {
+        // The active pointer didn't match a box key. Older builds saved the
+        // network-prefixed address (addrWithNet) here while the box is keyed by
+        // the stable address, so after a network switch the pointer goes stale.
+        // Recover by matching on the address payload (ignoring the f/t prefix),
+        // else fall back to the first stored wallet — never drop a user who has
+        // wallets back into the onboarding flow.
+        var wallets = OpenedBox.addressInsance.values
+            .where((w) => w != null && w.addr != '')
+            .toList();
+        if (wallets.isNotEmpty) {
+          var payload =
+              activeAddrStr.length > 1 ? activeAddrStr.substring(1) : '';
+          wallet = wallets.firstWhere(
+              (w) => w.addr.length > 1 && w.addr.substring(1) == payload,
+              orElse: () => wallets[0]);
+        }
+      }
     } else {
       try {
         var w = jsonDecode(walletstr);

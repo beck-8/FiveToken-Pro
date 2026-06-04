@@ -96,8 +96,12 @@ class MainPageState extends State<MainPage> {
                     onTap: (Wallet wallet) {
                       if (wallet.addr != $store.addr) {
                         $store.setWallet(wallet);
+                        // Persist the STABLE address (the wallet box key), not
+                        // the network-prefixed form — otherwise switching
+                        // networks makes this pointer stop matching the box and
+                        // the app falls back to onboarding on next launch.
                         Global.store.setString(
-                            'activeWalletAddress', wallet.addrWithNet);
+                            'activeWalletAddress', wallet.addr);
                         setState(() {});
                       }
                       Get.back();
