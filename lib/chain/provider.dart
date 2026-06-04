@@ -878,6 +878,12 @@ class FilecoinProvider {
           if (method == 16 && params.isNotEmpty) {
             var amt = Cbor.decodeMinerWithdrawAmount(params);
             if (amt != null) innerDecoded = jsonEncode({'AmountRequested': amt});
+          } else if (method == 3 &&
+              to == marketActorAddress &&
+              params.isNotEmpty) {
+            // market WithdrawBalance [provider, amount] — not ChangeWorker.
+            var amt = Cbor.decodeMarketWithdrawAmount(params);
+            if (amt != null) innerDecoded = jsonEncode({'AmountRequested': amt});
           } else if (method == 23 && params.isNotEmpty) {
             var owner = Cbor.decodeChangeOwner(params, prefix);
             if (owner != null) innerDecoded = owner;
@@ -908,7 +914,9 @@ class FilecoinProvider {
           'gas_fee': '0',
           'params_json': jsonEncode(
               {'To': to, 'Value': value, 'Method': method, 'Params': params}),
-          'params_method': _msigInnerMethodName(method),
+          'params_method': (method == 3 && to == marketActorAddress)
+              ? FilecoinMethod.withdraw
+              : _msigInnerMethodName(method),
           'params_params': innerDecoded,
           'nonce': 0,
           'params_txnid': txid,

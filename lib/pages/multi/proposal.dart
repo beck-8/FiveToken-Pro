@@ -104,6 +104,7 @@ class MultiProposalPageState extends State<MultiProposalPage> {
         '16': FilecoinMethod.withdraw,
         '21': FilecoinMethod.confirmUpdateWorkerKey,
         '23': FilecoinMethod.changeOwner,
+        '24': FilecoinMethod.withdraw, // market withdraw renders like a withdraw
       }[methodId];
 
   /// serialize params
@@ -129,6 +130,15 @@ class MultiProposalPageState extends State<MultiProposalPage> {
         break;
       case '16':
         params = await Flotus.genProposalForWithdrawBalanceV3(to, value);
+        innerParams = jsonEncode({"AmountRequested": value});
+        break;
+      case '24':
+        // storage-market withdraw: the inner call targets the market actor
+        // (f05); `to` is the provider/miner whose escrow is withdrawn.
+        params = jsonEncode({
+          'param':
+              FilParams.proposeMarketWithdraw(marketActorAddress, to, value)
+        });
         innerParams = jsonEncode({"AmountRequested": value});
         break;
       case '21':
@@ -469,7 +479,8 @@ class MultiProposalPageState extends State<MultiProposalPage> {
                   },
                 )),
             Visibility(
-                visible: methodId == '0' || methodId == '16',
+                visible:
+                    methodId == '0' || methodId == '16' || methodId == '24',
                 child: Field(
                   label: 'amount'.tr,
                   controller: valueCtrl,

@@ -401,6 +401,27 @@ class FilParams {
     return Cbor.toBase64(bytes);
   }
 
+  /// Multisig `Propose` (method 2) params wrapping a storage-market
+  /// `WithdrawBalance`: ProposeParams[To, Value, Method, Params] where the inner
+  /// call is { To: f05, Value: 0, Method: 3, Params: [provider, amount] }.
+  /// Flotus has no proposal builder for market withdraw, so we build it here.
+  static String proposeMarketWithdraw(
+      String marketActor, String provider, String amountAtto) {
+    final inner = <int>[
+      ...Cbor.arrayHeader(2),
+      ...Cbor.address(provider),
+      ...Cbor.tokenAmount(amountAtto),
+    ];
+    final propose = <int>[
+      ...Cbor.arrayHeader(4),
+      ...Cbor.address(marketActor), // To = f05
+      ...Cbor.tokenAmount('0'), // Value = 0
+      ...Cbor.uint(3), // Method = 3 (market WithdrawBalance)
+      ...Cbor.byteString(inner), // Params
+    ];
+    return Cbor.toBase64(propose);
+  }
+
   /// Init Actor `Exec` (method 2) params to create a multisig:
   /// [CodeCID(multisig), ConstructorParams-bytes]. ConstructorParams =
   /// [ [signers...], NumApprovalsThreshold, UnlockDuration, StartEpoch ].
