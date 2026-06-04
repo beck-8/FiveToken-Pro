@@ -39,7 +39,8 @@ class FilecoinMethod {
       case 2:
         return to == FilecoinAccount.f01 ? exec : propose;
       case 3:
-        return changeOwner;
+        // method 3 on the storage-market actor (f05) is a market withdraw
+        return to == marketActorAddress ? withdraw : changeOwner;
       case 16:
         return withdraw;
       case 21:

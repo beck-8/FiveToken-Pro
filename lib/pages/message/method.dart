@@ -24,7 +24,11 @@ class MethodMap {
         }
       }
       if (method == '3') {
-        if (OpenedBox.multiInsance.containsKey(to)) {
+        if (to == marketActorAddress) {
+          // method 3 on the storage-market actor (f05) is a market withdraw,
+          // not ChangeWorkerAddress on a miner.
+          des = 'marketWithdraw'.tr;
+        } else if (OpenedBox.multiInsance.containsKey(to)) {
           des = 'approve'.tr;
         } else {
           des = 'changeWorker'.tr;
@@ -63,6 +67,7 @@ class MethodSelectPageState extends State<MethodSelectPage> {
     return [
       '0',
       '16',
+      '24',
       '23',
       '3',
       '21',
