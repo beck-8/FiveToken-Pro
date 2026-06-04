@@ -706,7 +706,18 @@ class FilecoinProvider {
   /// backend `/message/msig/construct`).
   Future<String> getSerializeParams(Map<String, dynamic> data) async {
     try {
-      return await Flotus.genConstructorParamV3(jsonEncode(data));
+      var res = await Flotus.genConstructorParamV3(jsonEncode(data));
+      // Wlib returns a JSON wrapper {"param": <base64 CBOR>, "cid": ...}; the
+      // message Params field needs just the base64 string (same handling as the
+      // proposal flows). Returning the raw JSON makes Lotus reject it with
+      // "illegal base64 data at input byte 0".
+      try {
+        var decoded = jsonDecode(res);
+        if (decoded is Map && decoded['param'] != null) {
+          return decoded['param'].toString();
+        }
+      } catch (_) {}
+      return res;
     } catch (e) {
       print(e);
       rethrow;
