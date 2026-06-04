@@ -3,6 +3,7 @@ import 'package:fil/index.dart';
 import 'package:fil/pages/main/index.dart';
 import 'package:fil/pages/main/online.dart';
 import 'package:fil/pages/multi/widgets/multiMessageItem.dart';
+import 'package:fil/pages/other/webview.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /// display balance and messages of the multi-sig wallet
@@ -301,6 +302,20 @@ class MultiMainPageState extends State<MultiMainPage> with RouteAware {
             icon: IconNavBack,
             alignment: NavLeadingAlign,
           ),
+          actions: [
+            // Executed multisig transactions (e.g. a 1-of-N transfer that runs
+            // immediately) aren't "pending", so they don't appear in the
+            // on-chain proposal list. Open the multisig on the explorer to see
+            // its full transaction history.
+            IconButton(
+              icon: Icon(Icons.public, color: Color(0xff8392A5), size: 22),
+              onPressed: () {
+                goWebviewPage(
+                    url: explorerAddressUrl($store.multiWal.addrWithNet),
+                    title: 'detail'.tr);
+              },
+            ),
+          ],
         ),
       ),
       backgroundColor: Colors.white,
