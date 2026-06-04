@@ -62,7 +62,6 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
   }
 
   Future<TMessage> genMsg() async {
-    var ctrl = $store;
     var transactionInput = {
       'tx_id': msg.txId,
       'requester': actorId,
@@ -74,17 +73,21 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
     var str = jsonEncode(transactionInput);
     var p = await Flotus.genApprovalV3(str);
     var decodeParams = jsonDecode(p);
+    var from = $store.wal.addrWithNet;
+    // Fetch the real sender nonce here (don't depend on a prior getNonceAndGas,
+    // whose empty-params Approve gas estimate fails on glif -> errorSetGas).
+    var nonce = await Global.provider.getNonce(from);
     var message = TMessage(
         version: 0,
         method: 3,
-        nonce: $store.nonce,
-        from: $store.wal.addr,
+        nonce: nonce,
+        from: from,
         to: wallet.id,
         params: decodeParams['param'],
         value: '0',
-        gasFeeCap: ctrl.gas.value.feeCap,
-        gasLimit: ctrl.gas.value.gasLimit,
-        gasPremium: ctrl.gas.value.premium);
+        gasFeeCap: '0',
+        gasLimit: 0,
+        gasPremium: '0');
     // Estimate gas on the real Approve message (empty-params estimate fails).
     var realGas = await Global.provider.estimateGas(message);
     message.gasFeeCap = realGas.feeCap;
@@ -92,6 +95,7 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
     message.gasPremium = realGas.premium;
     $store.setGas(realGas);
     $store.setChainGas(realGas);
+    $store.setNonce(nonce);
     return message;
   }
 
@@ -141,12 +145,10 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
       return;
     }
     if (!$store.canPush) {
-      var valid =
-          await Global.provider.getNonceAndGas(to: wallet.id, method: 3);
-      if (!valid) {
-        showCustomError('errorSetGas'.tr);
-        return;
-      }
+      // Nonce only — gas is estimated on the real Approve message in genMsg.
+      // (An empty-params Approve gas estimate fails on glif -> errorSetGas.)
+      var nonce = await Global.provider.getNonce($store.wal.addrWithNet);
+      $store.setNonce(nonce);
     }
     var balanceNum = BigInt.tryParse($store.wal.balance);
     var feeNum = $store.gas.value.feeNum;

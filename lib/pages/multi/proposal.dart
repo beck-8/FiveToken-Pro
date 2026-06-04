@@ -163,13 +163,11 @@ class MultiProposalPageState extends State<MultiProposalPage> {
     }
     if (!$store.canPush) {
       showCustomLoading('Loading');
-      var valid = await Global.provider
-          .getNonceAndGas(to: wallet.id, method: 2, methodName: 'Propose');
+      // Nonce only — gas is estimated on the real Propose message in genMsg.
+      // (An empty-params Propose gas estimate fails on glif -> errorSetGas.)
+      var nonce = await Global.provider.getNonce(from);
       dismissAllToast();
-      if (!valid) {
-        showCustomError('errorSetGas'.tr);
-        return;
-      }
+      $store.setNonce(nonce);
     }
     var balance = BigInt.tryParse(wallet.balance);
     var amountAtto = BigInt.tryParse(fil2Atto(value));
@@ -293,20 +291,22 @@ class MultiProposalPageState extends State<MultiProposalPage> {
   }
 
   Future<TMessage> genMsg() async {
-    var controller = $store;
     var p = await getParamsByMethod(to, fil2Atto(value));
     var decodeParams = jsonDecode(p);
+    // Fetch the real sender nonce here (don't depend on a prior getNonceAndGas,
+    // whose empty-params Propose gas estimate fails on glif -> errorSetGas).
+    var nonce = await Global.provider.getNonce(from);
     var msg = TMessage(
         version: 0,
         method: 2,
-        nonce: $store.nonce,
+        nonce: nonce,
         from: from,
         to: wallet.id,
         params: decodeParams['param'],
         value: '0',
-        gasFeeCap: controller.gas.value.feeCap,
-        gasLimit: controller.gas.value.gasLimit,
-        gasPremium: controller.gas.value.premium);
+        gasFeeCap: '0',
+        gasLimit: 0,
+        gasPremium: '0');
     // Estimate gas on the real Propose message (empty-params estimate fails).
     var realGas = await Global.provider.estimateGas(msg);
     msg.gasFeeCap = realGas.feeCap;
@@ -314,6 +314,7 @@ class MultiProposalPageState extends State<MultiProposalPage> {
     msg.gasPremium = realGas.premium;
     $store.setGas(realGas);
     $store.setChainGas(realGas);
+    $store.setNonce(nonce);
     return msg;
   }
 

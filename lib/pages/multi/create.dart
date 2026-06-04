@@ -41,7 +41,6 @@ class MultiCreatePageState extends State<MultiCreatePage> {
   }
 
   Future<TMessage> genMsg() async {
-    var g = $store.gas.value;
     var value = '0';
     var threshold = int.parse(thresholdCtrl.text.trim());
     var params = {
@@ -52,17 +51,22 @@ class MultiCreatePageState extends State<MultiCreatePage> {
 
     /// serialize create params
     var p = await Global.provider.getSerializeParams(params);
+    // Fetch the real sender nonce here so creation doesn't depend on a prior
+    // getNonceAndGas — its gas estimate is on an Exec message with EMPTY params,
+    // which GasEstimateMessageGas rejects (that's what surfaced as
+    // "手续费或nonce设置失败" / errorSetGas).
+    var nonce = await Global.provider.getNonce(from);
     var msg = TMessage(
         version: 0,
         method: 2,
-        nonce: $store.nonce,
+        nonce: nonce,
         from: from,
         to: FilecoinAccount.f01,
         params: p,
         value: value,
-        gasFeeCap: g.feeCap,
-        gasLimit: g.gasLimit,
-        gasPremium: g.premium);
+        gasFeeCap: '0',
+        gasLimit: 0,
+        gasPremium: '0');
     // Gas must be estimated on the real Exec message (params present); an
     // empty-params estimate fails, which left the fee at 0.
     var realGas = await Global.provider.estimateGas(msg);
@@ -70,6 +74,7 @@ class MultiCreatePageState extends State<MultiCreatePage> {
     msg.gasLimit = realGas.gasLimit;
     msg.gasPremium = realGas.premium;
     $store.setGas(realGas);
+    $store.setNonce(nonce);
     return msg;
   }
 
@@ -143,23 +148,18 @@ class MultiCreatePageState extends State<MultiCreatePage> {
       showCustomError('errorSigner'.tr);
       return;
     }
-    if (!$store.canPush) {
-      var valid = await Global.provider.getNonceAndGas(
-          to: FilecoinAccount.f01, method: 2, methodName: 'Exec');
-      if (!valid) {
-        showCustomError('errorSetGas'.tr);
-        return;
-      }
+    // Validate by building the REAL Exec message (nonce + gas estimated on the
+    // actual params). The old getNonceAndGas pre-check estimated gas on an
+    // empty-params Exec, which always fails on glif -> errorSetGas.
+    TMessage msg;
+    try {
+      msg = await genMsg();
+    } catch (e) {
+      showCustomError('errorSetGas'.tr);
+      return;
     }
 
     if ($store.wal.readonly == 1) {
-      TMessage msg;
-      try {
-        msg = await genMsg();
-      } catch (e) {
-        showCustomError('createFail'.tr);
-        return;
-      }
       $store.setPushBackPage(mainPage);
       var cid = await Flotus.genCid(msg: jsonEncode(msg));
       Get.toNamed(mesBodyPage, arguments: {'mes': msg});
