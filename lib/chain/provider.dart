@@ -455,10 +455,21 @@ class FilecoinProvider {
             approveRequired: state['NumApprovalsThreshold']);
         var signers = state['Signers'];
         if (signers is List) {
-          signers.forEach((s) {
-            // signers are id-addresses (f0..); map id->id (robust resolved lazily)
-            info.signerMap[s.toString()] = s.toString();
-          });
+          // On-chain signers are id-addresses (f0..). Resolve each to its robust
+          // pubkey address (f1/f3) so the app can match them against an imported
+          // wallet (which is keyed by its robust address). signerMap = id->robust;
+          // pending proposals still reference signers by id, so keep id as key.
+          for (var s in signers) {
+            var id = s.toString();
+            var robust = id;
+            if (id.length > 2 && id[1] == '0') {
+              try {
+                var r = await _call('StateAccountKey', [id, _head]);
+                if (r is String && r != '') robust = r;
+              } catch (_) {}
+            }
+            info.signerMap[id] = robust;
+          }
         }
         return info;
       }

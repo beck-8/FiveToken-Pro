@@ -159,11 +159,13 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
       return;
     }
     if (actorId == '') {
+      // signerMap is now keyed by signer id; the pending proposal's proposer is
+      // already an id-address, and the approval requester must be that id.
       if (!wallet.signerMap.containsKey(proposer)) {
         showCustomError('getActorFailed'.tr);
         return;
       } else {
-        actorId = wallet.signerMap[proposer];
+        actorId = proposer;
       }
     }
     if ($store.wal.readonly == 1) {

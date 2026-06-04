@@ -36,7 +36,8 @@ class MultiImportPageState extends State<MultiImportPage> {
     try {
       var res = await Global.provider.getMultiInfo(addr);
       var signer = $store.addr;
-      var signers = res.signerMap.keys.toList();
+      // signerMap is id->robust; match the active wallet by its robust address.
+      var signers = res.signerMap.values.toList();
       if (!signers.contains(Global.netPrefix + signer.substring(1))) {
         showCustomError('notSigner'.tr);
       } else {
