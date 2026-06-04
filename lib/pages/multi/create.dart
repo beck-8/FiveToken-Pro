@@ -1,6 +1,7 @@
 import 'package:fil/common/index.dart';
 import 'package:fil/index.dart';
 import 'package:fil/widgets/dialog.dart';
+import 'package:oktoast/oktoast.dart';
 
 /// create a multi-sig wallet
 class MultiCreatePage extends StatefulWidget {
@@ -151,13 +152,18 @@ class MultiCreatePageState extends State<MultiCreatePage> {
     // Validate by building the REAL Exec message (nonce + gas estimated on the
     // actual params). The old getNonceAndGas pre-check estimated gas on an
     // empty-params Exec, which always fails on glif -> errorSetGas.
+    // Surface the real chain error (e.g. insufficient funds) instead of a
+    // generic fee/nonce message.
+    showCustomLoading('Loading');
     TMessage msg;
     try {
       msg = await genMsg();
     } catch (e) {
-      showCustomError('errorSetGas'.tr);
+      dismissAllToast();
+      showCustomError(getErrorMessage(e.toString()));
       return;
     }
+    dismissAllToast();
 
     if ($store.wal.readonly == 1) {
       $store.setPushBackPage(mainPage);

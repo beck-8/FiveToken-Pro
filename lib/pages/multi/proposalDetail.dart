@@ -100,10 +100,12 @@ class MultiProposalDetailPageState extends State<MultiProposalDetailPage> {
   }
 
   void pushMessage(String pass, {bool increaseNonce}) async {
-    var message = await genMsg();
-    var wal = $store.wal;
-    var private = await getPrivateKey(wal.addr, pass, wal.skKek);
     try {
+      // genMsg (real gas estimate) and getPrivateKey can throw — keep them
+      // inside the try so the real error surfaces instead of going unhandled.
+      var message = await genMsg();
+      var wal = $store.wal;
+      var private = await getPrivateKey(wal.addr, pass, wal.skKek);
       await Global.provider.sendMessage(
           message: message,
           private: private,
