@@ -32,19 +32,24 @@ libraries). If your default `java` is not JDK 8, uncomment and set
 `org.gradle.java.home=/path/to/jdk8`. If Gradle needs an HTTP proxy for your
 network, uncomment the `systemProp.*.proxy*` lines.
 
-## 3. Build (debug)
+## 3. Build (release)
+
+For everyday installation use `--release` (smaller, optimized, R8-shrunk):
 
 ```bash
 flutter pub get          # fetches flotus (github.com/beck-8/flotus) + bls
-flutter build apk --debug
-# -> build/app/outputs/flutter-apk/app-debug.apk
+flutter build apk --release
+# -> build/app/outputs/flutter-apk/app-release.apk
 ```
+
+Use `flutter build apk --debug` only while developing (faster incremental builds
+and debuggable, but larger and unoptimized).
 
 Install on an emulator/device (the APK includes x86_64, so standard emulators
 work):
 
 ```bash
-adb install -r build/app/outputs/flutter-apk/app-debug.apk
+adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ## 4. Signing
@@ -63,8 +68,8 @@ APKs built by anyone (you building for someone else, or that person rebuilding
 later) **update over each other in place and keep the wallet data**.
 
 ```bash
-flutter build apk --debug      # signed with the shared key
-flutter build apk --release    # also the shared key, unless key.properties exists
+flutter build apk --release    # recommended: shared key, unless key.properties exists
+flutter build apk --debug      # dev only: also the shared key
 ```
 
 > ⚠️ The shared key is **public** — it is for build/update *compatibility*, not

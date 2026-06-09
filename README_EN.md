@@ -105,13 +105,16 @@ See [BUILD.md](./BUILD.md). Key points:
   null-safety, pre-AndroidX). Toolchain versions must match — newer ones won't
   build it.
 - Copy the config: `cp android/gradle.properties.example android/gradle.properties`.
-- Debug build:
+- Release build (**use this for everyday installs** — smaller and optimized):
 
   ```bash
   flutter pub get                 # fetches flotus(github.com/beck-8/flotus) + bls
-  flutter build apk --debug
-  # -> build/app/outputs/flutter-apk/app-debug.apk
+  flutter build apk --release
+  # -> build/app/outputs/flutter-apk/app-release.apk
   ```
+
+  Use `flutter build apk --debug` only while developing (faster, debuggable, but
+  larger and unoptimized).
 
 No Android NDK or Go needed — the native libs (`flotus` / `bls`) ship prebuilt
 for arm64-v8a / armeabi-v7a / x86 / x86_64.
@@ -134,8 +137,8 @@ built by **anyone** (you building for someone, or that person rebuilding later)
 update over each other in place and keep the wallet data.
 
 ```bash
-flutter build apk --debug      # signed with the shared key
-flutter build apk --release    # also the shared key, unless key.properties exists
+flutter build apk --release    # recommended: shared key, unless key.properties exists
+flutter build apk --debug      # dev only: also the shared key
 ```
 
 > ⚠️ The shared key is **public** — it exists for build/update *compatibility*,

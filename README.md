@@ -65,13 +65,15 @@
 
 - 这是一个老 Flutter 工程（**Flutter 1.22.5 / Dart 2.10.x**，无 null-safety、pre-AndroidX），工具链版本必须匹配，新版本无法编译。
 - 复制配置：`cp android/gradle.properties.example android/gradle.properties`。
-- 编译 debug：
+- 编译 release（**日常安装用这个**，体积更小、已优化）：
 
   ```bash
   flutter pub get                 # 拉取 flotus(github.com/beck-8/flotus) + bls
-  flutter build apk --debug
-  # -> build/app/outputs/flutter-apk/app-debug.apk
+  flutter build apk --release
+  # -> build/app/outputs/flutter-apk/app-release.apk
   ```
+
+  调试开发时才用 `flutter build apk --debug`（增量快、可调试，但包大、未优化）。
 
 无需 Android NDK 或 Go —— native 库（`flotus` / `bls`）已为 arm64-v8a / armeabi-v7a / x86 / x86_64 预编译。
 
@@ -86,8 +88,8 @@ Android APK 必须签名才能安装，没有“未签名”的可安装包。�
 本仓库内置了一个共享 keystore **`android/fivetoken-shared.jks`**（alias `fivetoken`，密码都是 `fivetoken`）。**debug 与 release 默认都用它签名**，无需任何配置。因为大家用的是同一把 key，所以**任何人编出的包**（你帮别人编、或他以后自己重编）都能**原地覆盖更新、数据不丢**。
 
 ```bash
-flutter build apk --debug      # 用共享 key 签名
-flutter build apk --release    # 没有 key.properties 时也用共享 key
+flutter build apk --release    # 推荐：没有 key.properties 时用共享 key 签名
+flutter build apk --debug      # 仅调试用：也用共享 key
 ```
 
 > ⚠️ 这把共享 key 是**公开**的，只为解决**编译/更新兼容**，**不提供防篡改保证**。签名一致**不能**证明安装包来自可信来源（任何人都能用这把 key 签）。请只安装你自己编译的、或来源可信的包；**不要**依赖它做钱包 App 的公开分发。
