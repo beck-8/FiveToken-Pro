@@ -35,7 +35,7 @@ String get filfoxApi {
   return null;
 }
 class Global {
-  static String version = "v2.2.0";
+  static String version = "v2.3.0";
 
   static bool get isRelease => bool.fromEnvironment("dart.vm.product");
 
